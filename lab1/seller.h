@@ -5,7 +5,7 @@
 #include <string>
 
 class Seller{
-protected:
+private:
     std::string name;
     double salary;
     bool isAdmin;
