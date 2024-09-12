@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <memory>
+#include <algorithm>
 
 using namespace std;
 
@@ -68,57 +70,57 @@ public:
 class Shop {
 private:
     string name;
-    vector<Seller*> sellers;
-    vector<Product*> products;
+    vector<unique_ptr<Seller>> sellers;
+    vector<unique_ptr<Product>> products;
 
 public:
-    Shop(const std::string_view n) : name(n) {}
+    explicit Shop(const std::string_view n) : name(n) {}
 
-    void addSeller(Seller* seller) {
-        sellers.push_back(seller);
+    void addSeller(unique_ptr<Seller> seller) {
+        sellers.push_back(std::move(seller));
     }
 
     void removeSeller(const std::string_view sellerName) {
-        for (auto it = sellers.begin(); it != sellers.end(); ++it) {
-            if ((*it)->getName() == sellerName) {
-                delete *it;
-                sellers.erase(it);
-                cout << "Продавец " << sellerName << " удален." << endl;
-                return;
-            }
+        auto it = std::remove_if(sellers.begin(), sellers.end(), [&](const unique_ptr<Seller>& seller) {
+            return seller->getName() == sellerName;
+        });
+        if (it != sellers.end()) {
+            sellers.erase(it, sellers.end());
+            cout << "Продавец " << sellerName << " удален." << endl;
+        } else {
+            cout << "Продавец не найден." << endl;
         }
-        cout << "Продавец не найден." << endl;
     }
 
     Seller* getSeller(const std::string_view sellerName) {
-        for (Seller* seller : sellers) {
+        for (auto& seller : sellers) {
             if (seller->getName() == sellerName) {
-                return seller;
+                return seller.get();
             }
         }
         return nullptr;
     }
 
-    void addProduct(Product* product) {
-        products.push_back(product);
+    void addProduct(unique_ptr<Product> product) {
+        products.push_back(std::move(product));
     }
 
     void removeProduct(const std::string_view productName) {
-        for (auto it = products.begin(); it != products.end(); ++it) {
-            if ((*it)->getName() == productName) {
-                delete *it;
-                products.erase(it);
-                cout << "Товар " << productName << " удален." << endl;
-                return;
-            }
+        auto it = std::remove_if(products.begin(), products.end(), [&](const unique_ptr<Product>& product) {
+            return product->getName() == productName;
+        });
+        if (it != products.end()) {
+            products.erase(it, products.end());
+            cout << "Товар " << productName << " удален." << endl;
+        } else {
+            cout << "Товар не найден." << endl;
         }
-        cout << "Товар не найден." << endl;
     }
 
     Product* getProduct(const std::string_view productName) {
-        for (Product* product : products) {
+        for (auto& product : products) {
             if (product->getName() == productName) {
-                return product;
+                return product.get();
             }
         }
         return nullptr;
@@ -127,51 +129,39 @@ public:
     void displayShop(bool isAdmin) const {
         cout << "Магазин: " << name << endl;
         cout << "Продавцы:" << endl;
-        for (Seller* seller : sellers) {
+        for (const auto& seller : sellers) {
             seller->displaySeller();
         }
         cout << "Товары:" << endl;
-        for (Product* product : products) {
+        for (const auto& product : products) {
             product->displayProduct(isAdmin);
-        }
-    }
-
-    ~Shop() {
-        for (Seller* seller : sellers) {
-            delete seller; 
-        }
-        for (Product* product : products) {
-            delete product;
         }
     }
 };
 
 int main() {
-    Shop* vapeShop = new Shop("Scam Judas");
+    auto vapeShop = std::make_unique<Shop>("Scam Judas");
 
-    Seller* seller1 = new Seller("Даник", 800);
-    Seller* seller2 = new Seller("Яна", 1000, true);
-    vapeShop->addSeller(seller1);
-    vapeShop->addSeller(seller2);
+    auto seller1 = std::make_unique<Seller>("Даник", 800);
+    auto seller2 = std::make_unique<Seller>("Яна", 1000, true);
+    vapeShop->addSeller(std::move(seller1));
+    vapeShop->addSeller(std::move(seller2));
 
-    Product* product1 = new Product("Xros 3 mini", 85, 54, 3);
-    Product* product2 = new Product("Hotspot", 15, 8, 60);
-    vapeShop->addProduct(product1);
-    vapeShop->addProduct(product2);
+    auto product1 = std::make_unique<Product>("Xros 3 mini", 85, 54, 3);
+    auto product2 = std::make_unique<Product>("Hotspot", 15, 8, 60);
+    vapeShop->addProduct(std::move(product1));
+    vapeShop->addProduct(std::move(product2));
 
     cout << "Информация для обычного продавца (Даник):" << endl;
-    vapeShop->displayShop(seller1->getIsAdmin());
+    vapeShop->displayShop(false);
 
     cout << "\nИнформация для администратора (Яна):" << endl;
-    vapeShop->displayShop(seller2->getIsAdmin());
+    vapeShop->displayShop(true);
 
     vapeShop->removeSeller("Даник");
-
     vapeShop->removeProduct("Hotspot");
 
-    vapeShop->displayShop(seller2->getIsAdmin());
-
-    delete vapeShop;
+    vapeShop->displayShop(true);
 
     return 0;
 }
