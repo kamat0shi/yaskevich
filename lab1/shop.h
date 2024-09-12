@@ -6,33 +6,31 @@
 #include "product.h"
 #include "seller.h"
 
-using namespace std;
-
 class Shop {
 private:
-    string name;
+    std::string name;
     vector<Seller*> sellers;
     vector<Product*> products;
 public:
-    Shop(const string& n) : name(n) {}
+    Shop(const std::string_view n) : name(n) {}
 
     void addSeller(Seller* seller){
         sellers.push_back(seller);
     }
     
-    void removeSeller(const string& sellerName){
+    void removeSeller(const std::string_view sellerName){
         for (auto it = sellers.begin(); it != sellers.end(); ++it){
             if ((*it)->getName() == sellerName){
                 delete *it;
                 sellers.erase(it);
-                cout << "Продавец " << sellerName << " удален." << endl;
+                std::cout << "Продавец " << sellerName << " удален." << std::endl;
                 return;
             }
         }
-        cout << "Продавец не найден." << endl;
+        std::cout << "Продавец не найден." << std::endl;
     }
 
-    Seller* getSeller(const string& sellerName) {
+    Seller* getSeller(const std::string_view sellerName) {
         for (Seller* seller : sellers){
             if (seller->getName() == sellerName){
                 return seller;
@@ -45,19 +43,19 @@ public:
         products.push_back(product);
     }
 
-    void removeProduct(const string& productName) {
+    void removeProduct(const std::string_view productName) {
         for (auto it = products.begin(); it != products.end(); ++it) {
             if ((*it)->getName() == productName) {
                 delete *it;
                 products.erase(it);
-                cout << "Товар " << productName << " удален." << endl;
+                std::cout << "Товар " << productName << " удален." << std::endl;
                 return;
             }
         }
-        cout << "Товар не найден." << endl;
+        std::cout << "Товар не найден." << std::endl;
     }
 
-    Product* getProduct(const string& productName) {
+    Product* getProduct(const std::string_view productName) {
         for (Product* product : products) {
             if (product->getName() == productName) {
                 return product;
@@ -67,12 +65,12 @@ public:
     }
 
     void displayShop(bool isAdmin) const {
-        cout << "Магазин: " << name << endl;
-        cout << "Продавцы:" << endl;
+        std::cout << "Магазин: " << name << std::endl;
+        std::cout << "Продавцы:" << std::endl;
         for (Seller* seller : sellers) {
             seller->displaySeller();
         }
-        cout << "Товары:" << endl;
+        std::cout << "Товары:" << std::endl;
         for (Product* product : products) {
             product->displayProduct(isAdmin);
         }

@@ -4,22 +4,20 @@
 #include <iostream>
 #include <string>
 
-using namespace std;
-
 class Seller{
 protected:
-    string name;
+    std::string name;
     double salary;
     bool isAdmin;
 
 public:
-    Seller(const string& n, double s, bool admin = false)
+    Seller(const std::string_view n, double s, bool admin = false)
         : name(n), salary(s), isAdmin(admin) {}
 
-    void setName (const string& n) { name = n; }
+    void setName (const std::string_view n) { name = n; }
     void setSalary (double s) { salary = s; }
 
-    string getName() const { return name; }
+    std::string getName() const { return name; }
     double getSalary() const { return salary; }
     bool getIsAdmin() const { return isAdmin; }
 
