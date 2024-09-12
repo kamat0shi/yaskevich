@@ -15,7 +15,7 @@ private:
     std::vector<std::unique_ptr<Product> > products; 
 
 public:
-    Shop(const std::string_view n) : name(n) {}
+    explicit Shop(const std::string_view n) : name(n) {}
 
     void addSeller(std::unique_ptr<Seller> seller){
         sellers.push_back(std::move(seller));  
