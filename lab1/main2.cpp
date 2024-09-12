@@ -81,7 +81,7 @@ public:
     }
 
     void removeSeller(const std::string_view sellerName) {
-        auto it = std::remove_if(sellers.begin(), sellers.end(), [&](const unique_ptr<Seller>& seller) {
+        auto it = std::remove_if(sellers.begin(), sellers.end(), [&](const auto& seller) {
             return seller->getName() == sellerName;
         });
         if (it != sellers.end()) {
@@ -93,7 +93,7 @@ public:
     }
 
     Seller* getSeller(const std::string_view sellerName) {
-        for (auto& seller : sellers) {
+        for (const auto& seller : sellers) {
             if (seller->getName() == sellerName) {
                 return seller.get();
             }
@@ -106,7 +106,7 @@ public:
     }
 
     void removeProduct(const std::string_view productName) {
-        auto it = std::remove_if(products.begin(), products.end(), [&](const unique_ptr<Product>& product) {
+        auto it = std::remove_if(products.begin(), products.end(), [&](const auto& product) {
             return product->getName() == productName;
         });
         if (it != products.end()) {
@@ -118,7 +118,7 @@ public:
     }
 
     Product* getProduct(const std::string_view productName) {
-        for (auto& product : products) {
+        for (const auto& product : products) {
             if (product->getName() == productName) {
                 return product.get();
             }
