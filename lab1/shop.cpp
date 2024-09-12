@@ -3,41 +3,29 @@
 
 using namespace std;
 
-Shop::Shop(const std::string_view n) : name(n) {}
-
-void Shop::addSeller(Seller* seller) {
-    sellers.push_back(seller);
-}
-
 void Shop::removeSeller(const std::string_view sellerName) {
     for (auto it = sellers.begin(); it != sellers.end(); ++it) {
         if ((*it)->getName() == sellerName) {
-            delete *it; // Освобождение памяти
-            sellers.erase(it);
+            sellers.erase(it); 
             cout << "Продавец " << sellerName << " удален." << endl;
             return;
         }
     }
-    std::cout << "Продавец не найден." << endl;
+    cout << "Продавец не найден." << endl;
 }
 
 Seller* Shop::getSeller(const std::string_view sellerName) {
-    for (Seller* seller : sellers) {
+    for (const auto& seller : sellers) {
         if (seller->getName() == sellerName) {
-            return seller;
+            return seller.get();
         }
     }
     return nullptr;
 }
 
-void Shop::addProduct(Product* product) {
-    products.push_back(product);
-}
-
 void Shop::removeProduct(const std::string_view productName) {
     for (auto it = products.begin(); it != products.end(); ++it) {
         if ((*it)->getName() == productName) {
-            delete *it; // Освобождение памяти
             products.erase(it);
             cout << "Товар " << productName << " удален." << endl;
             return;
@@ -47,9 +35,9 @@ void Shop::removeProduct(const std::string_view productName) {
 }
 
 Product* Shop::getProduct(const std::string_view productName) {
-    for (Product* product : products) {
+    for (const auto& product : products) {
         if (product->getName() == productName) {
-            return product;
+            return product.get();
         }
     }
     return nullptr;
@@ -58,20 +46,11 @@ Product* Shop::getProduct(const std::string_view productName) {
 void Shop::displayShop(bool isAdmin) const {
     cout << "Магазин: " << name << endl;
     cout << "Продавцы:" << endl;
-    for (Seller* seller : sellers) {
+    for (const auto& seller : sellers) {
         seller->displaySeller();
     }
     cout << "Товары:" << endl;
-    for (Product* product : products) {
+    for (const auto& product : products) {
         product->displayProduct(isAdmin);
-    }
-}
-
-Shop::~Shop() {
-    for (Seller* seller : sellers) {
-        delete seller; // Освобождение памяти
-    }
-    for (Product* product : products) {
-        delete product; // Освобождение памяти
     }
 }

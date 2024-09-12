@@ -4,6 +4,11 @@
 #include <iostream>
 #include <string>
 
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
 class Seller{
 private:
     std::string name;
@@ -22,11 +27,11 @@ public:
     bool getIsAdmin() const { return isAdmin; }
 
     void displaySeller() const {
-        cout << "Имя: " << name << ", Зарплата: " << salary;
+        std::cout << "Имя: " << name << ", Зарплата: " << salary;
         if (isAdmin) {
-            cout << " (Администратор)";
+            std::cout << " (Администратор)";
         }
-        cout << endl;
+        std::cout << std::endl;
     }
 };
 
