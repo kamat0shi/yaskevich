@@ -2,11 +2,12 @@
 #include "shop.h"
 #include "seller.h"
 #include "product.h"
+#include <memory>
 
 using namespace std;
 
 int main() {
-    Shop* vapeShop = new Shop("Scam_Judas");
+    std::unique_ptr<Shop> vapeShop = std::make_unique<Shop>("Scam_Judas");
 
     Seller* seller1 = new Seller("Данила", 800);
     Seller* seller2 = new Seller("Яна", 1000, true);
@@ -29,8 +30,6 @@ int main() {
     vapeShop->removeProduct("Hotspot");
 
     vapeShop->displayShop(seller2->getIsAdmin());
-
-    delete vapeShop;
-
+    
     return 0;
 }
