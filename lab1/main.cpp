@@ -9,15 +9,15 @@ using namespace std;
 int main() {
     auto vapeShop = std::make_unique<Shop>("Scam_Judas");
 
-    Seller* seller1 = new Seller("Данила", 800);
-    Seller* seller2 = new Seller("Яна", 1000, true);
-    vapeShop->addSeller(seller1);
-    vapeShop->addSeller(seller2);
+    auto seller1 = std::make_unique<Seller>("Данила", 800);
+    auto seller2 = std::make_unique<Seller>("Яна", 1000, true);
+    vapeShop->addSeller(seller1.get());
+    vapeShop->addSeller(seller2.get());
 
-    Product* product1 = new Product("Xros 3 mini", 85, 54, 3);
-    Product* product2 = new Product("Hotspot", 15, 8, 60);
-    vapeShop->addProduct(product1);
-    vapeShop->addProduct(product2);
+    auto product1 = std::make_unique<Product>("Xros 3 mini", 85, 54, 3);
+    auto product2 = std::make_unique<Product>("Hotspot", 15, 8, 60);
+    vapeShop->addProduct(product1.get());
+    vapeShop->addProduct(product2.get());
 
     cout << "Информация для обычного продавца (Данила):" << endl;
     vapeShop->displayShop(seller1->getIsAdmin());
