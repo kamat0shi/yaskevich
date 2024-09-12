@@ -11,10 +11,10 @@ private:
     double wholesalePrice;
     int quantity;
 public:
-    Product(const std::string& n, double rPrice, double wPrice, int q)
+    Product(const std::string_view n, double rPrice, double wPrice, int q)
         : name(n), retailPrice(rPrice), wholesalePrice(wPrice), quantity(q) {}
     
-    void setName(const std::string& n) { name = n; }
+    void setName(const std::string_view n) { name = n; }
     void setRetailPrice(double rPrice) { retailPrice = rPrice; }
     void setWholesalePrice(double wPrice) {wholesalePrice = wPrice; }
     void setQuantity(int q) { quantity = q; }
