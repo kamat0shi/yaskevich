@@ -41,7 +41,7 @@ public:
 };
 
 class Seller {
-protected:
+private:
     string name;
     double salary;
     bool isAdmin;
