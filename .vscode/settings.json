@@ -7,7 +7,7 @@
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.useMsvc": false,
   "code-runner.executorMap": {
-    "cpp": "cd $dir && g++ -std=c++2b $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+    "cpp": "cd $dir && g++ -std=c++2b $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt"
   },
   "C_Cpp_Runner.warnings": [
     "-Wall",
