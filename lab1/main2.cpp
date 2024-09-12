@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <ranges>
 #include <algorithm>
 
 using namespace std;
@@ -81,11 +82,11 @@ public:
     }
 
     void removeSeller(const std::string_view sellerName) {
-        auto it = std::remove_if(sellers.begin(), sellers.end(), [&](const auto& seller) {
+        auto it = std::ranges::remove_if(sellers, [&](const auto& seller) {
             return seller->getName() == sellerName;
         });
-        if (it != sellers.end()) {
-            sellers.erase(it, sellers.end());
+        sellers.erase(it.begin(), it.end());
+        if (it.begin() != sellers.end()) {
             cout << "Продавец " << sellerName << " удален." << endl;
         } else {
             cout << "Продавец не найден." << endl;
@@ -106,11 +107,11 @@ public:
     }
 
     void removeProduct(const std::string_view productName) {
-        auto it = std::remove_if(products.begin(), products.end(), [&](const auto& product) {
+        auto it = std::ranges::remove_if(products, [&](const auto& product) {
             return product->getName() == productName;
         });
-        if (it != products.end()) {
-            products.erase(it, products.end());
+        products.erase(it.begin(), it.end());
+        if (it.begin() != products.end()) {
             cout << "Товар " << productName << " удален." << endl;
         } else {
             cout << "Товар не найден." << endl;
