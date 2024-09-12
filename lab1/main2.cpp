@@ -12,10 +12,10 @@ private:
     int quantity;
 
 public:
-    Product(const string& n, double rPrice, double wPrice, int q)
+    Product(const std::string_view n, double rPrice, double wPrice, int q)
         : name(n), retailPrice(rPrice), wholesalePrice(wPrice), quantity(q) {}
 
-    void setName(const string& n) { name = n; }
+    void setName(const std::string_view n) { name = n; }
     void setRetailPrice(double rPrice) { retailPrice = rPrice; }
     void setWholesalePrice(double wPrice) { wholesalePrice = wPrice; }
     void setQuantity(int q) { quantity = q; }
@@ -47,9 +47,9 @@ protected:
     bool isAdmin;
 
 public:
-    Seller(const string& n, double s, bool admin = false) : name(n), salary(s), isAdmin(admin) {}
+    Seller(const std::string_view n, double s, bool admin = false) : name(n), salary(s), isAdmin(admin) {}
 
-    void setName(const string& n) { name = n; }
+    void setName(const std::string_view n) { name = n; }
     void setSalary(double s) { salary = s; }
 
     string getName() const { return name; }
@@ -72,13 +72,13 @@ private:
     vector<Product*> products;
 
 public:
-    Shop(const string& n) : name(n) {}
+    Shop(const std::string_view n) : name(n) {}
 
     void addSeller(Seller* seller) {
         sellers.push_back(seller);
     }
 
-    void removeSeller(const string& sellerName) {
+    void removeSeller(const std::string_view sellerName) {
         for (auto it = sellers.begin(); it != sellers.end(); ++it) {
             if ((*it)->getName() == sellerName) {
                 delete *it;
@@ -90,7 +90,7 @@ public:
         cout << "Продавец не найден." << endl;
     }
 
-    Seller* getSeller(const string& sellerName) {
+    Seller* getSeller(const std::string_view sellerName) {
         for (Seller* seller : sellers) {
             if (seller->getName() == sellerName) {
                 return seller;
@@ -103,7 +103,7 @@ public:
         products.push_back(product);
     }
 
-    void removeProduct(const string& productName) {
+    void removeProduct(const std::string_view productName) {
         for (auto it = products.begin(); it != products.end(); ++it) {
             if ((*it)->getName() == productName) {
                 delete *it;
@@ -115,7 +115,7 @@ public:
         cout << "Товар не найден." << endl;
     }
 
-    Product* getProduct(const string& productName) {
+    Product* getProduct(const std::string_view productName) {
         for (Product* product : products) {
             if (product->getName() == productName) {
                 return product;
