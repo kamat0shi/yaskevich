@@ -1,11 +1,12 @@
 #include "seller.h"
 #include <iostream>
+#include <memory>
 
 using namespace std;
 
-Seller::Seller(const string& n, double s, bool admin) : name(n), salary(s), isAdmin(admin) {}
+Seller::Seller(const std::string_view n, double s, bool admin) : name(n), salary(s), isAdmin(admin) {}
 
-void Seller::setName(const string& n) { name = n; }
+void Seller::setName(const std::string_view n) { name = n; }
 void Seller::setSalary(double s) { salary = s; }
 
 string Seller::getName() const { return name; }

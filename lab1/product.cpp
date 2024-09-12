@@ -3,10 +3,10 @@
 
 using namespace std;
 
-Product::Product(const string& n, double rPrice, double wPrice, int q)
+Product::Product(const std::string_view n, double rPrice, double wPrice, int q)
     : name(n), retailPrice(rPrice), wholesalePrice(wPrice), quantity(q) {}
 
-void Product::setName(const string& n) { name = n; }
+void Product::setName(const std::string_view n) { name = n; }
 void Product::setRetailPrice(double rPrice) { retailPrice = rPrice; }
 void Product::setWholesalePrice(double wPrice) { wholesalePrice = wPrice; }
 void Product::setQuantity(int q) { quantity = q; }

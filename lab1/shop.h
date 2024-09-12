@@ -3,14 +3,15 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include "product.h"
 #include "seller.h"
 
 class Shop {
-private:
+public:
     std::string name;
-    vector<Seller*> sellers;
-    vector<Product*> products;
+    std::vector<Seller*> sellers;
+    std::vector<Product*> products;
 public:
     Shop(const std::string_view n) : name(n) {}
 

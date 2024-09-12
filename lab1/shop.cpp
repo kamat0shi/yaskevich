@@ -3,13 +3,13 @@
 
 using namespace std;
 
-Shop::Shop(const string& n) : name(n) {}
+Shop::Shop(const std::string_view n) : name(n) {}
 
 void Shop::addSeller(Seller* seller) {
     sellers.push_back(seller);
 }
 
-void Shop::removeSeller(const string& sellerName) {
+void Shop::removeSeller(const std::string_view sellerName) {
     for (auto it = sellers.begin(); it != sellers.end(); ++it) {
         if ((*it)->getName() == sellerName) {
             delete *it; // Освобождение памяти
@@ -18,10 +18,10 @@ void Shop::removeSeller(const string& sellerName) {
             return;
         }
     }
-    cout << "Продавец не найден." << endl;
+    std::cout << "Продавец не найден." << endl;
 }
 
-Seller* Shop::getSeller(const string& sellerName) {
+Seller* Shop::getSeller(const std::string_view sellerName) {
     for (Seller* seller : sellers) {
         if (seller->getName() == sellerName) {
             return seller;
@@ -34,7 +34,7 @@ void Shop::addProduct(Product* product) {
     products.push_back(product);
 }
 
-void Shop::removeProduct(const string& productName) {
+void Shop::removeProduct(const std::string_view productName) {
     for (auto it = products.begin(); it != products.end(); ++it) {
         if ((*it)->getName() == productName) {
             delete *it; // Освобождение памяти
@@ -46,7 +46,7 @@ void Shop::removeProduct(const string& productName) {
     cout << "Товар не найден." << endl;
 }
 
-Product* Shop::getProduct(const string& productName) {
+Product* Shop::getProduct(const std::string_view productName) {
     for (Product* product : products) {
         if (product->getName() == productName) {
             return product;
