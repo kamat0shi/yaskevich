@@ -26,8 +26,8 @@
 *.a
 *.lib
 
-*.vscode/
-*.DS_STORE
+.vscode/
+.DS_STORE
 
 # Executables
 *.exe
