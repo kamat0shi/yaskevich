@@ -26,6 +26,9 @@
 *.a
 *.lib
 
+*.vscode/
+*.DS_STORE
+
 # Executables
 *.exe
 *.out
