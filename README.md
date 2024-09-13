@@ -1,36 +1,3 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vape Shop Management System</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 20px;
-        }
-        h1, h2 {
-            font-family: 'Academy Engraved LET', sans-serif;
-            font-weight: bold;
-        }
-        ul, ol {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-        ul li, ol li {
-            margin-bottom: 10px;
-        }
-        code {
-            font-family: monospace;
-        }
-        a {
-            color: #1a0dab;
-        }
-    </style>
-</head>
-<body>
     <h1>Vape Shop Management System</h1>
 
     <h2>Описание</h2>
@@ -113,5 +80,3 @@
 
     <h2>Ссылка на SonarCloud</h2>
     <p>Для анализа качества кода и проверки на ошибки вы можете перейти по следующей ссылке: <a href="https://sonarcloud.io/project/overview?id=kamat0shi_yaskevich_PonLHL">SonarCloud Overview</a></p>
-</body>
-</html>
