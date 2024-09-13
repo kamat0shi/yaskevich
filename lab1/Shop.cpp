@@ -7,11 +7,12 @@ void Shop::addSeller(std::unique_ptr<Seller> seller) {
 }
 
 void Shop::removeSeller(const std::string_view sellerName) {
+    size_t initialSize = sellers.size();
     auto it = std::ranges::remove_if(sellers, [&](const auto& seller) {
         return seller->getName() == sellerName;
     });
     sellers.erase(it.begin(), it.end());
-    if (it.begin() != sellers.end()) {
+    if (sellers.size() < initialSize) {
         std::cout << "Продавец " << sellerName << " удален." << std::endl;
     } else {
         std::cout << "Продавец не найден." << std::endl;
@@ -32,11 +33,12 @@ void Shop::addProduct(std::unique_ptr<Product> product) {
 }
 
 void Shop::removeProduct(const std::string_view productName) {
+    size_t initialSize = products.size();
     auto it = std::ranges::remove_if(products, [&](const auto& product) {
         return product->getName() == productName;
     });
     products.erase(it.begin(), it.end());
-    if (it.begin() != products.end()) {
+    if (products.size() < initialSize) {
         std::cout << "Товар " << productName << " удален." << std::endl;
     } else {
         std::cout << "Товар не найден." << std::endl;

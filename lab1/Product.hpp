@@ -27,4 +27,4 @@ public:
     void displayProduct(bool isAdmin) const;
 };
 
-#endif // PRODUCT_H
+#endif

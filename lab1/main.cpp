@@ -17,7 +17,7 @@ void displayMenu() {
 int main() {
     auto vapeShop = make_unique<Shop>("Scam Judas");
 
-    auto seller1 = make_unique<Seller>("Даник", 800);
+    auto seller1 = make_unique<Seller>("Danik", 800);
     auto seller2 = make_unique<Seller>("Яна", 1000, true);
     vapeShop->addSeller(std::move(seller1));
     vapeShop->addSeller(std::move(seller2));
@@ -67,7 +67,7 @@ int main() {
         }
         if (running) {
             cout << "\nPress Enter to return to the menu...";
-            cin.get(); // Wait for user to press Enter
+            cin.get();
         }
     }
 
