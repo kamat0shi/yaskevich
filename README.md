@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 <h1 style="font-family: 'Academy Engraved LET', sans-serif; font-size: 2.5em; font-weight: bold;">Vape Shop Management System</h1>
-=======
-    <h1>Vape Shop Management System</h1>
->>>>>>> 19618bb682841d067a4ac8de149e9bb44c94881e
 
 <p style="font-size: 1.2em;">Проект представляет собой простую систему управления магазином, позволяющую управлять продавцами, товарами, продажами и вести финансовую отчетность. Приложение разработано с использованием C++ и поддерживает функционал для взаимодействия с пользователями через консоль.</p>
 
@@ -49,7 +45,6 @@
   </li>
 </ul>
 
-<<<<<<< HEAD
 <h2 style="font-family: 'Academy Engraved LET', sans-serif; font-size: 2em; font-weight: bold;">Структура проекта</h2>
 
 <p style="font-size: 1.2em;">Проект разделен на следующие файлы:</p>
@@ -94,7 +89,3 @@
 <h2 style="font-family: 'Academy Engraved LET', sans-serif; font-size: 2em; font-weight: bold;">Ссылка на SonarCloud</h2>
 
 <p style="font-size: 1.2em;"><a href="https://sonarcloud.io/project/overview?id=kamat0shi_yaskevich_PonLHL">SonarCloud Overview</a></p>
-=======
-    <h2>Ссылка на SonarCloud</h2>
-    <p>Для анализа качества кода и проверки на ошибки вы можете перейти по следующей ссылке: <a href="https://sonarcloud.io/project/overview?id=kamat0shi_yaskevich_PonLHL">SonarCloud Overview</a></p>
->>>>>>> 19618bb682841d067a4ac8de149e9bb44c94881e
