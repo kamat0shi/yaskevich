@@ -28,7 +28,7 @@
 
 .vscode/
 .DS_STORE
-
+*.wsd
 # Executables
 *.exe
 *.out

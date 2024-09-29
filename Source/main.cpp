@@ -1,6 +1,8 @@
 #include <iostream>
 #include <memory>
-#include "Shop.hpp"
+#include "../Headers/Sale.hpp"
+#include "../Headers/Shop.hpp"
+
 
 using namespace std;
 

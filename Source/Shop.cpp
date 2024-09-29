@@ -1,5 +1,5 @@
-#include "Shop.hpp"
-#include "Sale.hpp"
+#include "../Headers/Shop.hpp"
+#include "../Headers/Sale.hpp"
 
 Shop::Shop(const std::string_view n) : name(n) {}
 

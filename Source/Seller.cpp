@@ -1,4 +1,4 @@
-#include "Seller.hpp"
+#include "../Headers/Seller.hpp"
 
 Seller::Seller(const std::string_view n, double s, bool admin) : name(n), salary(s), isAdmin(admin) {}
 

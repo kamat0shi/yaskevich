@@ -1,4 +1,4 @@
-#include "Product.hpp"
+#include "../Headers/Product.hpp"
 
 Product::Product(const std::string_view n, double rPrice, double wPrice, int q)
     : name(n), retailPrice(rPrice), wholesalePrice(wPrice), quantity(q) {}

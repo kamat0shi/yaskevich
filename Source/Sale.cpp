@@ -1,4 +1,4 @@
-#include "Sale.hpp"
+#include "../Headers/Sale.hpp"
 
 Sale::Sale(const std::string_view productName, int qty, double salePrice, double discount, double profit)
     : productName(productName), quantitySold(qty), salePrice(salePrice), discountApplied(discount), profit(profit) {}
