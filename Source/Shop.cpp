@@ -1,4 +1,5 @@
 #include "Shop.hpp"
+#include "Sale.hpp"
 
 Shop::Shop(const std::string_view n) : name(n) {}
 
@@ -63,5 +64,30 @@ void Shop::displayShop(bool isAdmin) const {
     std::cout << "Товары:" << std::endl;
     for (const auto& product : products) {
         product->displayProduct(isAdmin);
+    }
+}
+
+void Shop::makeSale(const std::string_view productName, int qty, double discount) {
+    Product* product = getProduct(productName);
+    if (product && product->getQuantity() >= qty) {
+        double retailPrice = product->getRetailPrice();
+        double wholesalePrice = product->getWholesalePrice(true); 
+        double salePrice = retailPrice * qty * (1 - discount / 100.0);
+        double profit = (salePrice - wholesalePrice * qty);
+
+        product->reduceQuantity(qty);
+
+        salesHistory.emplace_back(productName, qty, salePrice, discount, profit);
+
+        std::cout << "Продажа завершена! Прибыль: $" << profit << std::endl;
+    } else {
+        std::cout << "Товар не найден или недостаточно количества!" << std::endl;
+    }
+}
+
+void Shop::displaySalesHistory() const {
+    std::cout << "История продаж: " << std::endl;
+    for (const auto& sale : salesHistory) {
+        sale.displaySale();
     }
 }

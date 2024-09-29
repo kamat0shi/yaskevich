@@ -3,6 +3,7 @@
 
 #include "Product.hpp"
 #include "Seller.hpp"
+#include "Sale.hpp"
 #include <vector>
 #include <memory>
 #include <ranges>
@@ -12,6 +13,7 @@ private:
     std::string name;
     std::vector<std::unique_ptr<Seller>> sellers;
     std::vector<std::unique_ptr<Product>> products;
+    std::vector<Sale> salesHistory;  
 
 public:
     explicit Shop(const std::string_view n);
@@ -25,6 +27,10 @@ public:
     Product* getProduct(const std::string_view productName);
 
     void displayShop(bool isAdmin) const;
+
+    void makeSale(const std::string_view productName, int qty, double discount = 0);
+
+    void displaySalesHistory() const;
 };
 
 #endif

@@ -10,7 +10,9 @@ void displayMenu() {
     cout << "2. Display shop information (admin)" << endl;
     cout << "3. Remove seller" << endl;
     cout << "4. Remove product" << endl;
-    cout << "5. Exit" << endl;
+    cout << "5. Make a sale" << endl;  
+    cout << "6. Display sales history" << endl; 
+    cout << "7. Exit" << endl;
     cout << "Enter your choice: ";
 }
 
@@ -58,7 +60,23 @@ int main() {
                 vapeShop->removeProduct(productName);
                 break;
             }
-            case 5:
+            case 5: {
+                cout << "\nEnter the name of the product to sell: ";
+                string productName;
+                getline(cin, productName);
+                cout << "Enter the quantity: ";
+                int qty;
+                cin >> qty;
+                cout << "Enter discount (if any): ";
+                double discount;
+                cin >> discount;
+                vapeShop->makeSale(productName, qty, discount);
+                break;
+            }
+            case 6:
+                vapeShop->displaySalesHistory();
+                break;
+            case 7:
                 running = false;
                 break;
             default:
@@ -73,4 +91,3 @@ int main() {
 
     return 0;
 }
-

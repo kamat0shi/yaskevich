@@ -26,3 +26,11 @@ void Product::displayProduct(bool isAdmin) const {
         std::cout << "Оптовая цена: " << wholesalePrice << std::endl;
     }
 }
+
+void Product::reduceQuantity(int qty) {
+    if (qty <= quantity) {
+        quantity -= qty;
+    } else {
+        std::cout << "Not enough stock available!" << std::endl;
+    }
+}

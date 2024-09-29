@@ -24,6 +24,8 @@ public:
     double getWholesalePrice(bool isAdmin) const;
     int getQuantity() const;
 
+    void reduceQuantity(int qty);
+
     void displayProduct(bool isAdmin) const;
 };
 
