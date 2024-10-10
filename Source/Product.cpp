@@ -39,15 +39,16 @@ bool compareQuantity(const Product& p1, const Product& p2) {
     return p1.quantity == p2.quantity;
 }
 
-bool Product::operator==(const Product& other) const {
-    return (name == other.name && retailPrice == other.retailPrice &&
-            wholesalePrice == other.wholesalePrice && quantity == other.quantity);
-}
-
-Product& Product::operator+(int additionalQty) {
-    this->quantity += additionalQty;
-    return *this;
-}
+bool operator==(const Product& lhs, const Product& rhs) {
+        return (lhs.name == rhs.name &&
+                lhs.retailPrice == rhs.retailPrice &&
+                lhs.wholesalePrice == rhs.wholesalePrice &&
+                lhs.quantity == rhs.quantity);
+    }
+Product operator+(Product lhs, int additionalQty) {
+        lhs.quantity += additionalQty;
+        return lhs;
+    }
 
 std::ostream& operator<<(std::ostream& os, const Product& product) {
     os << "Название: " << product.name 
