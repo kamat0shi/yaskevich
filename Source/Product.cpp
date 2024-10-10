@@ -34,3 +34,24 @@ void Product::reduceQuantity(int qty) {
         std::cout << "Not enough stock available!" << std::endl;
     }
 }
+
+bool compareQuantity(const Product& p1, const Product& p2) {
+    return p1.quantity == p2.quantity;
+}
+
+bool Product::operator==(const Product& other) const {
+    return (name == other.name && retailPrice == other.retailPrice &&
+            wholesalePrice == other.wholesalePrice && quantity == other.quantity);
+}
+
+Product& Product::operator+(int additionalQty) {
+    this->quantity += additionalQty;
+    return *this;
+}
+
+std::ostream& operator<<(std::ostream& os, const Product& product) {
+    os << "Название: " << product.name 
+       << ", Розничная цена: " << product.retailPrice 
+       << ", Количество: " << product.quantity;
+    return os;
+}
