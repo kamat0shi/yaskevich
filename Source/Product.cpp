@@ -38,15 +38,3 @@ void Product::reduceQuantity(int qty) {
 bool compareQuantity(const Product& p1, const Product& p2) {
     return p1.quantity == p2.quantity;
 }
-
-Product operator+(Product lhs, int additionalQty) {
-    lhs.quantity += additionalQty;
-    return lhs;
-}
-
-std::ostream& operator<<(std::ostream& os, const Product& product) {
-    os << "Название: " << product.name 
-       << ", Розничная цена: " << product.retailPrice 
-       << ", Количество: " << product.quantity;
-    return os;
-}

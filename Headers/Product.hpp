@@ -11,9 +11,22 @@ private:
     double wholesalePrice;
     int quantity;
 
+    // Скрытые друзья
     friend bool compareQuantity(const Product& p1, const Product& p2);
-    friend std::ostream& operator<<(std::ostream& os, const Product& product);
-    friend Product operator+(Product lhs, int additionalQty);
+
+    // Скрытый друг для оператора сложения (объявлен и определён в классе)
+    friend Product operator+(Product lhs, int additionalQty) {
+        lhs.quantity += additionalQty;
+        return lhs;
+    }
+
+    // Скрытый друг для оператора вывода (объявлен и определён в классе)
+    friend std::ostream& operator<<(std::ostream& os, const Product& product) {
+        os << "Название: " << product.name
+           << ", Розничная цена: " << product.retailPrice
+           << ", Количество: " << product.quantity;
+        return os;
+    }
 
 public:
     Product(const std::string_view n, double rPrice, double wPrice, int q);
