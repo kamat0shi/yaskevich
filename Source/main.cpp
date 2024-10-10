@@ -134,8 +134,8 @@ void displayMenu() {
 
 int main() {
     sqlite3* db;
-    int rc = sqlite3_open("shop_db.db", &db);
-    if (rc != SQLITE_OK) {
+    
+    if (int rc = sqlite3_open("shop_db.db", &db); rc != SQLITE_OK) {
         std::cerr << "Cannot open database: " << sqlite3_errmsg(db) << std::endl;
         return rc;
     }
