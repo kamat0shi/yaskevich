@@ -14,9 +14,9 @@ private:
     friend bool compareQuantity(const Product& p1, const Product& p2);
     friend std::ostream& operator<<(std::ostream& os, const Product& product);
     
-public:
     bool operator==(const Product& other) const;
     Product& operator+(int additionalQty);
+public:
 
     Product(const std::string_view n, double rPrice, double wPrice, int q);
 
