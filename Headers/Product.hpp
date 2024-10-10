@@ -13,9 +13,6 @@ private:
 
     friend bool compareQuantity(const Product& p1, const Product& p2);
     friend std::ostream& operator<<(std::ostream& os, const Product& product);
-
-    friend bool operator==(const Product& lhs, const Product& rhs) = default;
-
     friend Product operator+(Product lhs, int additionalQty);
 
 public:
