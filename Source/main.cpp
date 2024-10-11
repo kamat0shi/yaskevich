@@ -144,16 +144,12 @@ int main() {
 
     auto vapeShop = std::make_unique<Shop>("Scam Judas", db);
 
-    insert_seller(db, "Danik", 800, false);
-    insert_seller(db, "Яна", 1000, true);
 
     auto seller1 = std::make_unique<Seller>("Danik", 800);
     auto seller2 = std::make_unique<Seller>("Яна", 1000, true);
     vapeShop->addSeller(std::move(seller1));
     vapeShop->addSeller(std::move(seller2));
 
-    insert_product(db, 1, "Xros 3 mini", 85, 54, 3);
-    insert_product(db, 1, "Hotspot", 15, 8, 60);
 
     auto product1 = std::make_unique<Product>("Xros 3 mini", 85, 54, 3);
     auto product2 = std::make_unique<Product>("Hotspot", 15, 8, 60);

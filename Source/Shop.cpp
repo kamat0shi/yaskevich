@@ -4,18 +4,43 @@
 Shop::Shop(const std::string_view n, sqlite3* db) : name(n), db(db) {}
 
 void Shop::addSeller(std::unique_ptr<Seller> seller) {
+    const char* check_sql = "SELECT COUNT(*) FROM Users WHERE name = ?;";
+    sqlite3_stmt* check_stmt;
+    
+    if (sqlite3_prepare_v2(db, check_sql, -1, &check_stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare check statement: " << sqlite3_errmsg(db) << std::endl;
+        return;
+    }
+
+    sqlite3_bind_text(check_stmt, 1, seller->getName().c_str(), -1, SQLITE_STATIC);
+
+    int count = 0;
+    if (sqlite3_step(check_stmt) == SQLITE_ROW) {
+        count = sqlite3_column_int(check_stmt, 0);
+    }
+
+    sqlite3_finalize(check_stmt);
+
+    if (count > 0) {
+        std::cout << "Продавец с таким именем уже существует в базе данных.\n";
+        return;
+    }
+
     const char* sql = "INSERT INTO Users (name, salary, is_admin) VALUES (?, ?, ?);";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Failed to prepare insert statement: " << sqlite3_errmsg(db) << std::endl;
         return;
     }
+
     sqlite3_bind_text(stmt, 1, seller->getName().c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_double(stmt, 2, seller->getSalary());
     sqlite3_bind_int(stmt, 3, seller->getIsAdmin() ? 1 : 0);
 
     if (sqlite3_step(stmt) != SQLITE_DONE) {
         std::cerr << "Failed to insert seller: " << sqlite3_errmsg(db) << std::endl;
+    } else {
+        std::cout << "Продавец добавлен успешно.\n";
     }
 
     sqlite3_finalize(stmt);
@@ -71,12 +96,35 @@ Product* Shop::getProduct(const std::string_view productName) {
 }
 
 void Shop::addProduct(std::unique_ptr<Product> product) {
+    const char* check_sql = "SELECT COUNT(*) FROM Products WHERE name = ?;";
+    sqlite3_stmt* check_stmt;
+    
+    if (sqlite3_prepare_v2(db, check_sql, -1, &check_stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare check statement: " << sqlite3_errmsg(db) << std::endl;
+        return;
+    }
+
+    sqlite3_bind_text(check_stmt, 1, product->getName().c_str(), -1, SQLITE_STATIC);
+
+    int count = 0;
+    if (sqlite3_step(check_stmt) == SQLITE_ROW) {
+        count = sqlite3_column_int(check_stmt, 0);
+    }
+
+    sqlite3_finalize(check_stmt);
+
+    if (count > 0) {
+        std::cout << "Товар с таким именем уже существует в базе данных.\n";
+        return;
+    }
+
     const char* sql = "INSERT INTO Products (shop_id, name, retail_price, wholesale_price, quantity) VALUES (?, ?, ?, ?, ?);";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Failed to prepare insert statement: " << sqlite3_errmsg(db) << std::endl;
         return;
     }
+
     sqlite3_bind_int(stmt, 1, 1);
     sqlite3_bind_text(stmt, 2, product->getName().c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_double(stmt, 3, product->getRetailPrice());
@@ -85,6 +133,8 @@ void Shop::addProduct(std::unique_ptr<Product> product) {
 
     if (sqlite3_step(stmt) != SQLITE_DONE) {
         std::cerr << "Failed to insert product: " << sqlite3_errmsg(db) << std::endl;
+    } else {
+        std::cout << "Товар добавлен успешно.\n";
     }
 
     sqlite3_finalize(stmt);

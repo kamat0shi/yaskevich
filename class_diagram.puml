@@ -1,0 +1,67 @@
+@startuml
+
+class Shop {
+    - string name
+    - vector<Seller> sellers
+    - vector<Product> products
+    - vector<Sale> salesHistory
+    - sqlite3* db
+    --
+    + Shop(string n, sqlite3* db)
+    + void addSeller(unique_ptr<Seller> seller)
+    + void removeSeller(string_view sellerName)
+    + Seller* getSeller(string_view sellerName)
+    + void addProduct(unique_ptr<Product> product)
+    + void removeProduct(string_view productName)
+    + Product* getProduct(string_view productName)
+    + void displayShop(bool isAdmin) const
+    + void makeSale(string_view productName, int qty, double discount = 0)
+    + void displaySalesHistory() const
+}
+
+class Seller {
+    - string name
+    - double salary
+    - bool isAdmin
+    --
+    + Seller(string n, double s, bool admin = false)
+    + string getName() const
+    + double getSalary() const
+    + bool getIsAdmin() const
+    + void displaySeller() const
+}
+
+class Product {
+    - string name
+    - double retailPrice
+    - double wholesalePrice
+    - int quantity
+    --
+    + Product(string n, double rPrice, double wPrice, int q)
+    + string getName() const
+    + double getRetailPrice() const
+    + double getWholesalePrice(bool isAdmin) const
+    + int getQuantity() const
+    + void reduceQuantity(int qty)
+    + void displayProduct(bool isAdmin) const
+    + friend bool compareQuantity(Product p1, Product p2)
+    + friend Product operator+(Product lhs, int additionalQty)
+    + friend ostream& operator<<(ostream& os, Product product)
+}
+
+class Sale {
+    - string productName
+    - int quantitySold
+    - double salePrice
+    - double discountApplied
+    - double profit
+    --
+    + Sale(string productName, int qty, double salePrice, double discount, double profit)
+    + void displaySale() const
+}
+
+Shop "1" *-- "many" Seller : manages >
+Shop "1" *-- "many" Product : sells >
+Shop "1" *-- "many" Sale : records >
+
+@enduml
