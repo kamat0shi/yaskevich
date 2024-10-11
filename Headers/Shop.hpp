@@ -7,16 +7,18 @@
 #include <vector>
 #include <memory>
 #include <ranges>
+#include <sqlite3.h>
 
 class Shop {
 private:
     std::string name;
     std::vector<std::unique_ptr<Seller>> sellers;
     std::vector<std::unique_ptr<Product>> products;
-    std::vector<Sale> salesHistory;  
+    std::vector<Sale> salesHistory;
+    sqlite3* db;  
 
 public:
-    explicit Shop(const std::string_view n);
+    explicit Shop(const std::string_view n, sqlite3* db);
 
     void addSeller(std::unique_ptr<Seller> seller);
     void removeSeller(const std::string_view sellerName);
