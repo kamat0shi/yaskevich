@@ -24,8 +24,7 @@ void Shop::addSeller(std::unique_ptr<Seller> seller) {
 }
 
 void Shop::removeSeller(const std::string_view sellerName) {
-    const Seller* seller = getSeller(sellerName);
-    if (!seller) {
+    if (const Seller* seller = getSeller(sellerName); !seller) {
         std::cout << "Продавец не найден.\n";
         return;
     }
@@ -93,8 +92,7 @@ void Shop::addProduct(std::unique_ptr<Product> product) {
 }
 
 void Shop::removeProduct(const std::string_view productName) {
-    Product* product = getProduct(productName);
-    if (!product) {
+    if (Product* product = getProduct(productName); !product) {
         std::cout << "Товар не найден.\n";
         return;
     }
