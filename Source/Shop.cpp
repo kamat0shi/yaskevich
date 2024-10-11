@@ -24,7 +24,7 @@ void Shop::addSeller(std::unique_ptr<Seller> seller) {
 }
 
 void Shop::removeSeller(const std::string_view sellerName) {
-    Seller* seller = getSeller(sellerName);
+    const Seller* seller = getSeller(sellerName);
     if (!seller) {
         std::cout << "Продавец не найден.\n";
         return;
