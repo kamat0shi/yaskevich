@@ -43,10 +43,11 @@ void Shop::removeSeller(const std::string_view sellerName) {
 
     sqlite3_finalize(stmt);
 
-    auto it = std::remove_if(sellers.begin(), sellers.end(), [&](const std::unique_ptr<Seller>& s) {
+    auto new_end = std::ranges::remove_if(sellers, [&](const std::unique_ptr<Seller>& s) {
         return s->getName() == sellerName;
     });
-    sellers.erase(it, sellers.end());
+
+    sellers.erase(new_end.begin(), sellers.end());
 
     std::cout << "Продавец удален.\n";
 }
@@ -92,7 +93,7 @@ void Shop::addProduct(std::unique_ptr<Product> product) {
 }
 
 void Shop::removeProduct(const std::string_view productName) {
-    if (Product* product = getProduct(productName); !product) {
+    if (const Product* product = getProduct(productName); !product) {
         std::cout << "Товар не найден.\n";
         return;
     }
@@ -111,10 +112,11 @@ void Shop::removeProduct(const std::string_view productName) {
 
     sqlite3_finalize(stmt);
 
-    auto it = std::remove_if(products.begin(), products.end(), [&](const std::unique_ptr<Product>& p) {
+    auto new_end = std::ranges::remove_if(products, [&](const std::unique_ptr<Product>& p) {
         return p->getName() == productName;
     });
-    products.erase(it, products.end());
+
+    products.erase(new_end.begin(), products.end());
 
     std::cout << "Товар удален.\n";
 }
