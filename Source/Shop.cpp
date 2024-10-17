@@ -212,7 +212,7 @@ void Shop::displayShop(bool isAdmin) const {
     std::cout << "Магазин: " << name << std::endl;
     std::cout << "Продавцы:" << std::endl;
     for (const auto& seller : sellers) {
-        seller->displayInfo();  // заменяем displaySeller на displayInfo
+        seller->displayInfo(); 
     }
     std::cout << "Товары:" << std::endl;
     for (const auto& product : products) {

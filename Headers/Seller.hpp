@@ -19,10 +19,8 @@ public:
     double getSalary() const;
     bool getIsAdmin() const;
 
-    // Реализация чистой виртуальной функции из Person
     std::string getRole() const override;
 
-    // Переопределение виртуальной функции displayInfo
     void displayInfo() const override;
 };
 

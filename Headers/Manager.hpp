@@ -8,12 +8,10 @@ private:
     std::string name;
 
 public:
-    Manager(const std::string& n);
+    explicit Manager(const std::string& n);
 
-    // Реализация чистой виртуальной функции getRole
     std::string getRole() const override;
 
-    // Переопределение функции displayInfo
     void displayInfo() const override;
 
     void manageShop() const;
