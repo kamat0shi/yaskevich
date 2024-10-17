@@ -4,6 +4,10 @@
 #include "../Headers/Sale.hpp"
 #include "../Headers/Shop.hpp"
 #include "../Headers/Product.hpp"
+#include "../Headers/Person.hpp"
+#include "../Headers/Seller.hpp"
+#include "../Headers/Manager.hpp"
+#include "../Headers/AdminSeller.hpp"
 
 using namespace std;
 
@@ -128,13 +132,14 @@ void displayMenu() {
     cout << "5. Make a sale" << endl;
     cout << "6. Display sales history" << endl;
     cout << "7. Test overloaded operators and friend functions" << endl;
-    cout << "8. Exit" << endl;
+    cout << "8. Test multiple inheritance and virtual functions" << endl;
+    cout << "9. Exit" << endl;
     cout << "Enter your choice: ";
 }
 
 int main() {
     sqlite3* db;
-    
+
     if (int rc = sqlite3_open("shop_db.db", &db); rc != SQLITE_OK) {
         std::cerr << "Cannot open database: " << sqlite3_errmsg(db) << std::endl;
         return rc;
@@ -144,12 +149,10 @@ int main() {
 
     auto vapeShop = std::make_unique<Shop>("Scam Judas", db);
 
-
     auto seller1 = std::make_unique<Seller>("Danik", 800);
     auto seller2 = std::make_unique<Seller>("Яна", 1000, true);
     vapeShop->addSeller(std::move(seller1));
     vapeShop->addSeller(std::move(seller2));
-
 
     auto product1 = std::make_unique<Product>("Xros 3 mini", 85, 54, 3);
     auto product2 = std::make_unique<Product>("Hotspot", 15, 8, 60);
@@ -222,14 +225,23 @@ int main() {
                 }
                 break;
             }
-            case 8:
+            case 8: {
+                cout << "\nTesting multiple inheritance and virtual functions:" << endl;
+
+                auto adminSeller = std::make_unique<AdminSeller>("Bob", 1500);
+                adminSeller->displayInfo();
+                cout << "Role: " << adminSeller->getRole() << endl;
+
+                break;
+            }
+            case 9:
                 running = false;
                 break;
             default:
                 cout << "Invalid choice, please try again." << endl;
                 break;
         }
-        if (running && choice != 8) {
+        if (running && choice != 9) {
             cout << "\nPress Enter to return to the menu...";
             cin.get();
         }

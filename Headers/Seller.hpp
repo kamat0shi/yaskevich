@@ -1,10 +1,9 @@
 #ifndef SELLER_H
 #define SELLER_H
 
-#include <string>
-#include <iostream>
+#include "Person.hpp"
 
-class Seller {
+class Seller : public Person {
 private:
     std::string name;
     double salary;
@@ -20,7 +19,11 @@ public:
     double getSalary() const;
     bool getIsAdmin() const;
 
-    void displaySeller() const;
+    // Реализация чистой виртуальной функции из Person
+    std::string getRole() const override;
+
+    // Переопределение виртуальной функции displayInfo
+    void displayInfo() const override;
 };
 
 #endif
