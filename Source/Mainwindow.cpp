@@ -16,49 +16,47 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         std::cerr << "Cannot open database: " << sqlite3_errmsg(db) << std::endl;
         return;
     }
-
     vapeShop = std::make_unique<Shop>("Scam Judas", db);
-
-    QWidget *centralWidget = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout(centralWidget);
-
-    QLabel *label = new QLabel("Меню магазина", this);
-    layout->addWidget(label);
-
-    QPushButton *button1 = new QPushButton("Отобразить информацию о магазине (не админ)", this);
-    QPushButton *button2 = new QPushButton("Отобразить информацию о магазине (админ)", this);
-    QPushButton *button3 = new QPushButton("Удалить продавца", this);
-    QPushButton *button4 = new QPushButton("Удалить продукт", this);
-    QPushButton *button5 = new QPushButton("Совершить продажу", this);
-    QPushButton *button6 = new QPushButton("Добавить продавца", this);  
-    QPushButton *button7 = new QPushButton("Добавить продукт", this);   
-    QPushButton *button8 = new QPushButton("История продаж", this);
-
-    layout->addWidget(button1);
-    layout->addWidget(button2);
-    layout->addWidget(button3);
-    layout->addWidget(button4);
-    layout->addWidget(button5);
-    layout->addWidget(button6); 
-    layout->addWidget(button7);
-    layout->addWidget(button8);
-
     
-    infoDisplay = new QTextEdit(this);
+    auto centralWidget = std::make_unique<QWidget>(this);
+
+    auto layout = std::make_unique<QVBoxLayout>(centralWidget.get());
+
+    auto label = std::make_unique<QLabel>("Меню магазина", this);
+    layout->addWidget(label.get());
+
+    auto button1 = std::make_unique<QPushButton>("Отобразить информацию о магазине (не админ)", this);
+    auto button2 = std::make_unique<QPushButton>("Отобразить информацию о магазине (админ)", this);
+    auto button3 = std::make_unique<QPushButton>("Удалить продавца", this);
+    auto button4 = std::make_unique<QPushButton>("Удалить продукт", this);
+    auto button5 = std::make_unique<QPushButton>("Совершить продажу", this);
+    auto button6 = std::make_unique<QPushButton>("Добавить продавца", this);  
+    auto button7 = std::make_unique<QPushButton>("Добавить продукт", this);   
+    auto button8 = std::make_unique<QPushButton>("История продаж", this);
+    
+    layout->addWidget(button1.get());
+    layout->addWidget(button2.get());
+    layout->addWidget(button3.get());
+    layout->addWidget(button4.get());
+    layout->addWidget(button5.get());
+    layout->addWidget(button6.get());
+    layout->addWidget(button7.get());
+    layout->addWidget(button8.get());
+    
+    infoDisplay = std::make_unique<QTextEdit>(this);
     infoDisplay->setReadOnly(true); 
-    layout->addWidget(infoDisplay);
+    layout->addWidget(infoDisplay.get());
 
-    setCentralWidget(centralWidget);
+    setCentralWidget(centralWidget.release());
 
-    connect(button1, &QPushButton::clicked, this, &MainWindow::displayShopNonAdmin);
-    connect(button2, &QPushButton::clicked, this, &MainWindow::displayShopAdmin);
-    connect(button3, &QPushButton::clicked, this, &MainWindow::removeSeller);
-    connect(button4, &QPushButton::clicked, this, &MainWindow::removeProduct);
-    connect(button5, &QPushButton::clicked, this, &MainWindow::makeSale);
-    connect(button6, &QPushButton::clicked, this, &MainWindow::addSeller);  
-    connect(button7, &QPushButton::clicked, this, &MainWindow::addProduct);
-    connect(button8, &QPushButton::clicked, this, &MainWindow::displaySalesHistory);
-    
+    connect(button1.get(), &QPushButton::clicked, this, &MainWindow::displayShopNonAdmin);
+    connect(button2.get(), &QPushButton::clicked, this, &MainWindow::displayShopAdmin);
+    connect(button3.get(), &QPushButton::clicked, this, &MainWindow::removeSeller);
+    connect(button4.get(), &QPushButton::clicked, this, &MainWindow::removeProduct);
+    connect(button5.get(), &QPushButton::clicked, this, &MainWindow::makeSale);
+    connect(button6.get(), &QPushButton::clicked, this, &MainWindow::addSeller);  
+    connect(button7.get(), &QPushButton::clicked, this, &MainWindow::addProduct);
+    connect(button8.get(), &QPushButton::clicked, this, &MainWindow::displaySalesHistory);
 }
 
 MainWindow::~MainWindow() {
