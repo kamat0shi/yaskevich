@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <sqlite3.h>
 
 class Product {
 private:
@@ -27,7 +28,7 @@ private:
 
 public:
     Product(const std::string_view n, double rPrice, double wPrice, int q);
-
+    
     void setName(const std::string_view n);
     void setRetailPrice(double rPrice);
     void setWholesalePrice(double wPrice);
@@ -41,6 +42,11 @@ public:
     void reduceQuantity(int qty);
 
     void displayProduct(bool isAdmin) const;
+
+    int getIdByName(sqlite3* db, const std::string& productName);
+
+    double calculateProfit(int qty);
+    double calculateProfit(int qty, double discount);
 };
 
 #endif

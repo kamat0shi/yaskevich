@@ -33,3 +33,18 @@
 *.exe
 *.out
 *.app
+
+# Object files (сгенерированные объектные файлы)
+*.o
+
+# Qmake cache file
+.qmake.stash
+
+# PlantUML diagram files
+*.puml
+
+# Makefile (если он автоматически генерируется qmake или cmake)
+Makefile
+
+# Qt project file (если он не является необходимым для сборки в других системах)
+*.pro

@@ -2,6 +2,7 @@
 #define SELLER_H
 
 #include "Person.hpp"
+#include <sqlite3.h>
 
 class Seller : public Person {
 private:
@@ -22,6 +23,8 @@ public:
     std::string getRole() const override;
 
     void displayInfo() const override;
+
+    int getIdByName(sqlite3* db, const std::string& sellerName);
 };
 
 #endif

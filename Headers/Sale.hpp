@@ -15,6 +15,12 @@ private:
 public:
     Sale(const std::string_view productName, int qty, double salePrice, double discount, double profit); 
 
+    std::string getProductName() const;
+    int getQuantitySold() const;
+    double getSalePrice() const;
+    double getDiscount() const;
+    double getProfit() const;
+
     void displaySale() const;
 };
 

@@ -1,5 +1,7 @@
 #include "../Headers/Seller.hpp"
 #include <iostream>
+#include <sqlite3.h>
+
 
 Seller::Seller(const std::string_view n, double s, bool admin)
     : name(n), salary(s), isAdmin(admin) {}
@@ -21,4 +23,22 @@ void Seller::displayInfo() const {
         std::cout << " (Администратор)";
     }
     std::cout << std::endl;
+}
+
+int Seller::getIdByName(sqlite3* db, const std::string& sellerName) {
+    int sellerId = 0;
+    const char* sql = "SELECT id FROM Users WHERE name = ?;";
+    sqlite3_stmt* stmt;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, sellerName.c_str(), -1, SQLITE_STATIC);
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            sellerId = sqlite3_column_int(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
+    } else {
+        std::cerr << "Ошибка при получении seller_id: " << sqlite3_errmsg(db) << std::endl;
+    }
+
+    return sellerId;
 }

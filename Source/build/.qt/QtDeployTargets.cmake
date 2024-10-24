@@ -1,0 +1,2 @@
+set(__QT_DEPLOY_TARGET_my_qt_project_FILE /Users/nnelkane/Downloads/Study/PonLHL/Yaskevich/Source/build/my_qt_project)
+set(__QT_DEPLOY_TARGET_my_qt_project_TYPE EXECUTABLE)

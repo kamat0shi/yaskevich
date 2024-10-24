@@ -38,3 +38,32 @@ void Product::reduceQuantity(int qty) {
 bool compareQuantity(const Product& p1, const Product& p2) {
     return p1.quantity == p2.quantity;
 }
+
+// Реализация метода getIdByName
+int Product::getIdByName(sqlite3* db, const std::string& productName) {
+    int productId = 0;
+    const char* sql = "SELECT id FROM Products WHERE name = ?;";
+    sqlite3_stmt* stmt;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, productName.c_str(), -1, SQLITE_STATIC);
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            productId = sqlite3_column_int(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
+    } else {
+        std::cerr << "Ошибка при получении product_id: " << sqlite3_errmsg(db) << std::endl;
+    }
+
+    return productId;
+}
+
+// Реализация статического полиморфизма
+double Product::calculateProfit(int qty) {
+    return retailPrice * qty - wholesalePrice * qty;
+}
+
+double Product::calculateProfit(int qty, double discount) {
+    double discountedPrice = retailPrice * (1 - discount / 100.0);
+    return discountedPrice * qty - wholesalePrice * qty;
+}
