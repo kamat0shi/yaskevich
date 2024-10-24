@@ -24,7 +24,7 @@ public:
 
     void displayInfo() const override;
 
-    int getIdByName(sqlite3* db, const std::string& sellerName);
+    int getIdByName(sqlite3* db, const std::string& sellerName) const;
 };
 
 #endif

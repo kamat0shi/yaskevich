@@ -25,12 +25,12 @@ void Seller::displayInfo() const {
     std::cout << std::endl;
 }
 
-int Seller::getIdByName(sqlite3* db, const std::string& sellerName) {
+int Seller::getIdByName(sqlite3* db, const std::string& sellerName) const{
     int sellerId = 0;
     const char* sql = "SELECT id FROM Users WHERE name = ?;";
     sqlite3_stmt* stmt;
 
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+    if (sqlite3_stmt* stmt; sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
         sqlite3_bind_text(stmt, 1, sellerName.c_str(), -1, SQLITE_STATIC);
         if (sqlite3_step(stmt) == SQLITE_ROW) {
             sellerId = sqlite3_column_int(stmt, 0);
