@@ -43,10 +43,10 @@ public:
 
     void displayProduct(bool isAdmin) const;
 
-    int getIdByName(sqlite3* db, const std::string& productName);
+    int getIdByName(sqlite3* db, const std::string& productName) const;
 
-    double calculateProfit(int qty);
-    double calculateProfit(int qty, double discount);
+    double calculateProfit(int qty) const;
+    double calculateProfit(int qty, double discount) const;
 };
 
 #endif
