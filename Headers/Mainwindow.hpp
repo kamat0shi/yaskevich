@@ -25,7 +25,7 @@ private slots:
     void displaySalesHistory();
 
 private:
-    QTextEdit *infoDisplay;
+    std::unique_ptr<QTextEdit> infoDisplay; 
     std::unique_ptr<Shop> vapeShop;
     sqlite3* db;  
 };
