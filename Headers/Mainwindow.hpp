@@ -12,7 +12,7 @@ class MainWindow : public QMainWindow {
 
 public:
     exeplit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
 private slots:
     void displayShopNonAdmin();
