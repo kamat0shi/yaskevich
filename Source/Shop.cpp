@@ -51,8 +51,7 @@ void Shop::addSeller(std::unique_ptr<Seller> seller) {
     sellers.push_back(std::move(seller));
 }
 void Shop::removeSeller(const std::string_view sellerName) {
-    Seller* seller = getSeller(sellerName);
-    if (!seller) {
+    if (const Seller* seller = getSeller(sellerName); !seller) { 
         std::cout << "Продавец не найден.\n";
         return;
     }
