@@ -19,8 +19,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     vapeShop = std::make_unique<Shop>("Scam Judas", db);
     
     auto centralWidget = std::make_unique<QWidget>(this);
-
-    auto layout = new QVBoxLayout(centralWidget.get());
+    
+    // Используем std::make_unique вместо new для layout
+    auto layout = std::make_unique<QVBoxLayout>(centralWidget.get());
 
     auto label = std::make_unique<QLabel>("Меню магазина", this);
     layout->addWidget(label.get());
@@ -42,12 +43,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     layout->addWidget(button6.get());
     layout->addWidget(button7.get());
     layout->addWidget(button8.get());
-    
+
     infoDisplay = std::make_unique<QTextEdit>(this);
     infoDisplay->setReadOnly(true); 
     layout->addWidget(infoDisplay.get());
 
-    setCentralWidget(centralWidget.get());
+    setCentralWidget(centralWidget.release());
 
     connect(button1.get(), &QPushButton::clicked, this, &MainWindow::displayShopNonAdmin);
     connect(button2.get(), &QPushButton::clicked, this, &MainWindow::displayShopAdmin);
