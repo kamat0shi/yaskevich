@@ -72,12 +72,12 @@ void Shop::removeSeller(const std::string_view sellerName) {
 
     sqlite3_finalize(stmt);
 
-    auto new_end = std::remove_if(sellers.begin(), sellers.end(), [&](const std::unique_ptr<Seller>& s) {
+   auto new_end = std::ranges::remove_if(sellers, [&](const std::unique_ptr<Seller>& s) {
         return s->getName() == sellerName;
     });
 
     if (new_end != sellers.end()) {
-        sellers.erase(new_end, sellers.end());
+        sellers.erase(new_end.begin(), new_end.end());
         std::cout << "Продавец удален из списка.\n";
     }
 }
@@ -176,9 +176,10 @@ void Shop::removeProduct(const std::string_view productName) {
     std::cout << "Товар удален.\n";
 }
 
+
 void Shop::makeSale(const std::string_view productName, int qty, double discount, const std::string& sellerName) {
     Product* product = getProduct(productName);
-    Seller* seller = getSeller(sellerName);
+    const Seller* seller = getSeller(sellerName);  // Указатель на const Seller
 
     if (!product || !seller) {
         std::cerr << "Продукт или продавец не найдены!" << std::endl;
@@ -200,17 +201,15 @@ void Shop::makeSale(const std::string_view productName, int qty, double discount
 
     double profit;
     if (discount > 0) {
-        profit = product->calculateProfit(qty, discount); 
+        profit = product->calculateProfit(qty, discount);
     } else {
-        profit = product->calculateProfit(qty); 
+        profit = product->calculateProfit(qty);
     }
 
     double salePrice = product->getRetailPrice() * qty * (1 - discount / 100.0);
 
-    const char* updateProductSQL = "UPDATE Products SET quantity = quantity - ? WHERE id = ?;";
-    sqlite3_stmt* updateStmt;
-    
-    if (sqlite3_prepare_v2(db, updateProductSQL, -1, &updateStmt, nullptr) == SQLITE_OK) {
+    // Обновление количества товара
+    if (sqlite3_stmt* updateStmt; sqlite3_prepare_v2(db, "UPDATE Products SET quantity = quantity - ? WHERE id = ?;", -1, &updateStmt, nullptr) == SQLITE_OK) {
         sqlite3_bind_int(updateStmt, 1, qty);
         sqlite3_bind_int(updateStmt, 2, productId);
 
@@ -218,7 +217,7 @@ void Shop::makeSale(const std::string_view productName, int qty, double discount
             std::cerr << "Ошибка обновления количества товара: " << sqlite3_errmsg(db) << std::endl;
         } else {
             std::cout << "Количество товара успешно обновлено." << std::endl;
-            product->setQuantity(product->getQuantity() - qty);
+            product->setQuantity(product->getQuantity() - qty);  // Обновляем количество в объекте
         }
 
         sqlite3_finalize(updateStmt);
@@ -226,14 +225,11 @@ void Shop::makeSale(const std::string_view productName, int qty, double discount
         std::cerr << "Ошибка подготовки SQL-запроса на обновление товара: " << sqlite3_errmsg(db) << std::endl;
     }
 
-    const char* insertSaleSQL = R"(
+    // Вставка новой продажи
+    if (sqlite3_stmt* insertStmt; sqlite3_prepare_v2(db, R"(
         INSERT INTO Sales (product_id, seller_id, quantity_sold, sale_price, discount, profit)
         VALUES (?, ?, ?, ?, ?, ?);
-    )";
-    
-    sqlite3_stmt* insertStmt;
-    
-    if (sqlite3_prepare_v2(db, insertSaleSQL, -1, &insertStmt, nullptr) == SQLITE_OK) {
+    )", -1, &insertStmt, nullptr) == SQLITE_OK) {
         sqlite3_bind_int(insertStmt, 1, productId);
         sqlite3_bind_int(insertStmt, 2, sellerId);
         sqlite3_bind_int(insertStmt, 3, qty);
