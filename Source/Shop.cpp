@@ -72,14 +72,12 @@ void Shop::removeSeller(const std::string_view sellerName) {
 
     sqlite3_finalize(stmt);
 
-   auto new_end = std::ranges::remove_if(sellers, [&](const std::unique_ptr<Seller>& s) {
+   auto subrange = std::ranges::remove_if(sellers, [&](const std::unique_ptr<Seller>& s) {
         return s->getName() == sellerName;
     });
 
-    if (new_end != sellers.end()) {
-        sellers.erase(new_end.begin(), new_end.end());
-        std::cout << "Продавец удален из списка.\n";
-    }
+    sellers.erase(subrange.begin(), subrange.end());
+    std::cout << "Продавец удален из списка.\n";
 }
 
 Seller* Shop::getSeller(const std::string_view sellerName) {
