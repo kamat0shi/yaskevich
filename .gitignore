@@ -49,7 +49,7 @@ Makefile
 # Qt project file (если он не является необходимым для сборки в других системах)
 *.pro
 
-/build/
+/Source/build/
 /Doxyfile
 /html/
 /latex/
