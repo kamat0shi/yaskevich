@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QTextEdit>
 #include <sqlite3.h>
-#include <memory>
 #include "../Headers/Shop.hpp"
 
 class MainWindow : public QMainWindow {
@@ -25,9 +24,9 @@ private slots:
     void displaySalesHistory();
 
 private:
-    std::unique_ptr<QTextEdit> infoDisplay; 
-    std::unique_ptr<Shop> vapeShop;
+    QTextEdit* infoDisplay;  // Обычный указатель на QTextEdit
+    Shop* vapeShop;  // Обычный указатель на Shop
     sqlite3* db;  
 };
 
-#endif  
+#endif

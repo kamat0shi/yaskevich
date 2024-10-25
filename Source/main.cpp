@@ -7,5 +7,5 @@ int main(int argc, char *argv[]) {
     window.setWindowTitle("Магазин Vapes");
     window.resize(800, 600);
     window.show();
-    return QApplication::exec();  // Заменено на QApplication::exec()
+    return app.exec();  // Вернулось к стандартному вызову app.exec()
 }
