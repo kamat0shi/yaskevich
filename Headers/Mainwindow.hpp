@@ -25,7 +25,7 @@ private slots:
 
 private:
     QTextEdit* infoDisplay;  // Обычный указатель на QTextEdit
-    Shop* vapeShop;  // Обычный указатель на Shop
+    std::unique_ptr<Shop> vapeShop;  // Обычный указатель на Shop
     sqlite3* db;  
 };
 

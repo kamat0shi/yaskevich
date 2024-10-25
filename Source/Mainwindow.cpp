@@ -9,34 +9,37 @@
 #include <iostream>
 #include <sqlite3.h>
 #include <string>
+#include <memory>
+
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    // Открытие базы данных
     if (int rc = sqlite3_open("../shop_db.db", &db); rc != SQLITE_OK) {
         std::cerr << "Cannot open database: " << sqlite3_errmsg(db) << std::endl;
         return;
     }
-    vapeShop = new Shop("Scam Judas", db);
+    vapeShop = std::make_unique<Shop>("Scam Judas", db);
 
-    // Создание центрального виджета и макета
-    QWidget *centralWidget = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout(centralWidget);
+    // auto centralWidget = std::make_unique<QWidget>(this);
+    // auto layout = std::make_unique<QVBoxLayout>(centralWidget.get());
 
-    // Создание метки
-    QLabel *label = new QLabel("Меню магазина", this);
+    // QWidget *centralWidget = new QWidget(this);
+    // QVBoxLayout *layout = new QVBoxLayout(centralWidget);
+
+    auto *centralWidget = new QWidget(this);
+    auto *layout = new QVBoxLayout(centralWidget);
+
+    auto *label = new QLabel("Меню магазина", this);
     layout->addWidget(label);
 
-    // Создание кнопок
-    QPushButton *button1 = new QPushButton("Отобразить информацию о магазине (не админ)", this);
-    QPushButton *button2 = new QPushButton("Отобразить информацию о магазине (админ)", this);
-    QPushButton *button3 = new QPushButton("Удалить продавца", this);
-    QPushButton *button4 = new QPushButton("Удалить продукт", this);
-    QPushButton *button5 = new QPushButton("Совершить продажу", this);
-    QPushButton *button6 = new QPushButton("Добавить продавца", this);  
-    QPushButton *button7 = new QPushButton("Добавить продукт", this);   
-    QPushButton *button8 = new QPushButton("История продаж", this);
+    auto *button1 = new QPushButton("Отобразить информацию о магазине (не админ)", this);
+    auto *button2 = new QPushButton("Отобразить информацию о магазине (админ)", this);
+    auto *button3 = new QPushButton("Удалить продавца", this);
+    auto *button4 = new QPushButton("Удалить продукт", this);
+    auto *button5 = new QPushButton("Совершить продажу", this);
+    auto *button6 = new QPushButton("Добавить продавца", this);  
+    auto *button7 = new QPushButton("Добавить продукт", this);   
+    auto *button8 = new QPushButton("История продаж", this);
 
-    // Добавление кнопок в макет
     layout->addWidget(button1);
     layout->addWidget(button2);
     layout->addWidget(button3);
@@ -46,12 +49,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     layout->addWidget(button7);
     layout->addWidget(button8);
 
-    // Создание и настройка поля для отображения информации
     infoDisplay = new QTextEdit(this);
     infoDisplay->setReadOnly(true);
     layout->addWidget(infoDisplay);
 
     // Установка центрального виджета
+    // setCentralWidget(centralWidget);
     setCentralWidget(centralWidget);
 
     // Подключение сигналов к слотам
@@ -67,7 +70,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 MainWindow::~MainWindow() {
     sqlite3_close(db);
-    delete vapeShop; 
 }
 
 void MainWindow::displayShopNonAdmin() {
