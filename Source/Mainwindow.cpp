@@ -19,12 +19,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     }
     vapeShop = std::make_unique<Shop>("Scam Judas", db);
 
-    // auto centralWidget = std::make_unique<QWidget>(this);
-    // auto layout = std::make_unique<QVBoxLayout>(centralWidget.get());
-
-    // QWidget *centralWidget = new QWidget(this);
-    // QVBoxLayout *layout = new QVBoxLayout(centralWidget);
-
     auto *centralWidget = new QWidget(this);
     auto *layout = new QVBoxLayout(centralWidget);
 
@@ -53,11 +47,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     infoDisplay->setReadOnly(true);
     layout->addWidget(infoDisplay);
 
-    // Установка центрального виджета
-    // setCentralWidget(centralWidget);
     setCentralWidget(centralWidget);
 
-    // Подключение сигналов к слотам
     connect(button1, &QPushButton::clicked, this, &MainWindow::displayShopNonAdmin);
     connect(button2, &QPushButton::clicked, this, &MainWindow::displayShopAdmin);
     connect(button3, &QPushButton::clicked, this, &MainWindow::removeSeller);
