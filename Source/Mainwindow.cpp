@@ -240,26 +240,20 @@ void MainWindow::displayInfoByName() {
                                          QLineEdit::Normal, "", &ok);
     if (!ok || name.isEmpty()) return;
 
-    bool isAdmin = true;  
+    bool isAdmin = true; 
 
     QString info;
 
-    auto productInfo = printInfoByName(vapeShop->getProducts(), name.toStdString(), [](const Product& p) {
+    if (auto productInfo = printInfoByName(vapeShop->getProducts(), name.toStdString(), [](const Product& p) {
         return p.getName();
-    }, isAdmin);
-    
-    if (productInfo) {
+    }, isAdmin)) {
         info += QString::fromStdString(*productInfo);
+    } else if (auto sellerInfo = printInfoByName(vapeShop->getSellers(), name.toStdString(), [](const Seller& s) {
+        return s.getName();
+    })) {
+        info += QString::fromStdString(*sellerInfo);
     } else {
-        auto sellerInfo = printInfoByName(vapeShop->getSellers(), name.toStdString(), [](const Seller& s) {
-            return s.getName();
-        });
-
-        if (sellerInfo) {
-            info += QString::fromStdString(*sellerInfo);
-        } else {
-            info += QString("Элемент с именем \"%1\" не найден.\n").arg(name);
-        }
+        info += QString("Элемент с именем \"%1\" не найден.\n").arg(name);
     }
 
     infoDisplay->setText(info);
