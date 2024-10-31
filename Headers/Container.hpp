@@ -5,6 +5,7 @@
 #include <memory>
 #include <algorithm>
 #include <iostream>
+#include <ranges>
 
 template <typename T>
 class Container {
@@ -17,12 +18,10 @@ public:
     }
 
     void removeItem(const std::string& name) {
-        auto it = std::remove_if(items.begin(), items.end(), [&name](const std::unique_ptr<T>& item) {
+        auto it = std::ranges::remove_if(items, [&name](const std::unique_ptr<T>& item) {
             return item->getName() == name;
         });
-        if (it != items.end()) {
-            items.erase(it, items.end());
-        }
+        items.erase(it.begin(), it.end());
     }
 
     T* findItem(const std::string& name) const {
