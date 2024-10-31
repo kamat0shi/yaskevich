@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <sqlite3.h>
+#include <sstream>
 
 class Product {
 private:
@@ -47,6 +48,9 @@ public:
 
     double calculateProfit(int qty) const;
     double calculateProfit(int qty, double discount) const;
+
+    void displayInfo(bool isAdmin = false) const;
+    std::string getInfo(bool isAdmin) const;
 };
 
 #endif

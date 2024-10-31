@@ -41,3 +41,12 @@ int Seller::getIdByName(sqlite3* db, const std::string& sellerName) const {
 
     return sellerId;
 }
+
+std::string Seller::getInfo() const {
+    std::stringstream ss;
+    ss << "Имя: " << name << ", Зарплата: " << salary;
+    if (isAdmin) {
+        ss << " (Администратор)";
+    }
+    return ss.str();
+}

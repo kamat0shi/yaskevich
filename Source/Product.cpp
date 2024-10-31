@@ -64,3 +64,20 @@ double Product::calculateProfit(int qty, double discount) const {
     double discountedPrice = retailPrice * (1 - discount / 100.0);
     return discountedPrice * qty - wholesalePrice * qty;
 }
+
+void Product::displayInfo(bool isAdmin) const {
+    std::cout << "Название: " << name << ", Розничная цена: " << retailPrice 
+              << ", Количество: " << quantity << std::endl;
+    if (isAdmin) {
+        std::cout << "Оптовая цена: " << wholesalePrice << std::endl;
+    }
+}
+
+std::string Product::getInfo(bool isAdmin) const {
+    std::stringstream ss;
+    ss << "Название: " << name << ", Розничная цена: " << retailPrice << ", Количество: " << quantity;
+    if (isAdmin) {
+        ss << ", Оптовая цена: " << wholesalePrice;
+    }
+    return ss.str();
+}

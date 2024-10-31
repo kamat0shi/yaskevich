@@ -22,6 +22,7 @@ private slots:
     void addSeller();
     void addProduct();
     void displaySalesHistory();
+    void displayInfoByName();
 
 private:
     QTextEdit* infoDisplay;  

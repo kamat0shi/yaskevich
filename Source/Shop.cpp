@@ -1,57 +1,99 @@
 #include "../Headers/Sale.hpp"
 #include "../Headers/Shop.hpp"
+#include "../Headers/Sale.hpp" 
+#include "../Headers/Utility.hpp"
 
 Shop::Shop(const std::string_view n, sqlite3* db) : name(n), db(db) {
+    fetchShopIdByName();
     loadSellersFromDB();
     loadProductsFromDB();
 }
 
-void Shop::addSeller(std::unique_ptr<Seller> seller) {
-    const char* check_sql = "SELECT COUNT(*) FROM Users WHERE name = ?;";
+void Shop::fetchShopIdByName() {
+    const char* check_sql = "SELECT id FROM Shops WHERE name = ?;";
     sqlite3_stmt* check_stmt;
     
     if (sqlite3_prepare_v2(db, check_sql, -1, &check_stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare check statement: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Ошибка при подготовке SQL-запроса: " << sqlite3_errmsg(db) << std::endl;
+        return;
+    }
+    
+    sqlite3_bind_text(check_stmt, 1, name.c_str(), -1, SQLITE_STATIC);
+
+    if (sqlite3_step(check_stmt) == SQLITE_ROW) {
+        shop_id = sqlite3_column_int(check_stmt, 0);
+        std::cout << "Идентификатор магазина " << name << " установлен: " << shop_id << std::endl;
+    } else {
+        sqlite3_finalize(check_stmt);
+
+        const char* insert_sql = "INSERT INTO Shops (name) VALUES (?);";
+        sqlite3_stmt* insert_stmt;
+        
+        if (sqlite3_prepare_v2(db, insert_sql, -1, &insert_stmt, nullptr) != SQLITE_OK) {
+            std::cerr << "Ошибка при подготовке SQL-запроса для вставки: " << sqlite3_errmsg(db) << std::endl;
+            return;
+        }
+
+        sqlite3_bind_text(insert_stmt, 1, name.c_str(), -1, SQLITE_STATIC);
+
+        if (sqlite3_step(insert_stmt) == SQLITE_DONE) {
+            shop_id = sqlite3_last_insert_rowid(db);
+            std::cout << "Создан новый магазин: " << name << " с идентификатором " << shop_id << std::endl;
+        } else {
+            std::cerr << "Ошибка при вставке нового магазина: " << sqlite3_errmsg(db) << std::endl;
+        }
+
+        sqlite3_finalize(insert_stmt);
+    }
+}
+
+void Shop::addSeller(std::unique_ptr<Seller> seller) {
+    const char* check_sql = "SELECT COUNT(*) FROM Users WHERE name = ? AND shop_id = ?;";
+    sqlite3_stmt* check_stmt;
+
+    if (sqlite3_prepare_v2(db, check_sql, -1, &check_stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Ошибка SQL: " << sqlite3_errmsg(db) << std::endl;
         return;
     }
 
     sqlite3_bind_text(check_stmt, 1, seller->getName().c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(check_stmt, 2, shop_id);
 
     int count = 0;
     if (sqlite3_step(check_stmt) == SQLITE_ROW) {
         count = sqlite3_column_int(check_stmt, 0);
     }
-
     sqlite3_finalize(check_stmt);
 
     if (count > 0) {
-        std::cout << "Продавец с таким именем уже существует в базе данных.\n";
+        std::cout << "Продавец уже существует.\n";
         return;
     }
 
-    const char* sql = "INSERT INTO Users (name, salary, is_admin) VALUES (?, ?, ?);";
+    const char* sql = "INSERT INTO Users (name, salary, is_admin, shop_id) VALUES (?, ?, ?, ?);";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare insert statement: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Ошибка SQL: " << sqlite3_errmsg(db) << std::endl;
         return;
     }
 
     sqlite3_bind_text(stmt, 1, seller->getName().c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_double(stmt, 2, seller->getSalary());
     sqlite3_bind_int(stmt, 3, seller->getIsAdmin() ? 1 : 0);
+    sqlite3_bind_int(stmt, 4, shop_id);
 
-    if (sqlite3_step(stmt) != SQLITE_DONE) {
-        std::cerr << "Failed to insert seller: " << sqlite3_errmsg(db) << std::endl;
+    if (sqlite3_step(stmt) == SQLITE_DONE) {
+        sellers.addItem(std::move(seller));
+        std::cout << "Продавец добавлен.\n";
     } else {
-        std::cout << "Продавец добавлен успешно.\n";
+        std::cerr << "Ошибка при добавлении продавца: " << sqlite3_errmsg(db) << std::endl;
     }
 
     sqlite3_finalize(stmt);
-
-    sellers.push_back(std::move(seller));
 }
+
 void Shop::removeSeller(const std::string_view sellerName) {
-    if (const Seller* seller = getSeller(sellerName); !seller) { 
+    if (const Seller* seller = sellers.findItem(std::string(sellerName)); !seller) {
         std::cout << "Продавец не найден.\n";
         return;
     }
@@ -59,55 +101,41 @@ void Shop::removeSeller(const std::string_view sellerName) {
     const char* sql = "DELETE FROM Users WHERE name = ?;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Ошибка при подготовке удаления продавца: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Ошибка SQL: " << sqlite3_errmsg(db) << std::endl;
         return;
     }
+
     sqlite3_bind_text(stmt, 1, sellerName.data(), -1, SQLITE_STATIC);
 
-    if (sqlite3_step(stmt) != SQLITE_DONE) {
-        std::cerr << "Ошибка при удалении продавца: " << sqlite3_errmsg(db) << std::endl;
+    if (sqlite3_step(stmt) == SQLITE_DONE) {
+        sellers.removeItem(std::string(sellerName));
+        std::cout << "Продавец удалён.\n";
     } else {
-        std::cout << "Продавец успешно удален из базы данных.\n";
+        std::cerr << "Ошибка при удалении продавца: " << sqlite3_errmsg(db) << std::endl;
     }
 
     sqlite3_finalize(stmt);
-
-   auto subrange = std::ranges::remove_if(sellers, [&](const std::unique_ptr<Seller>& s) {
-        return s->getName() == sellerName;
-    });
-
-    sellers.erase(subrange.begin(), subrange.end());
-    std::cout << "Продавец удален из списка.\n";
 }
 
 Seller* Shop::getSeller(const std::string_view sellerName) {
-    for (const auto& seller : sellers) {
-        if (seller->getName() == sellerName) {
-            return seller.get();
-        }
-    }
-    return nullptr;
+    return sellers.findItem(std::string(sellerName));
 }
 
 Product* Shop::getProduct(const std::string_view productName) {
-    for (const auto& product : products) {
-        if (product->getName() == productName) {
-            return product.get();
-        }
-    }
-    return nullptr;
+    return products.findItem(std::string(productName));
 }
 
 void Shop::addProduct(std::unique_ptr<Product> product) {
-    const char* check_sql = "SELECT COUNT(*) FROM Products WHERE name = ?;";
+    const char* check_sql = "SELECT COUNT(*) FROM Products WHERE name = ? AND shop_id = ?;";
     sqlite3_stmt* check_stmt;
-    
+
     if (sqlite3_prepare_v2(db, check_sql, -1, &check_stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare check statement: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Ошибка SQL: " << sqlite3_errmsg(db) << std::endl;
         return;
     }
 
     sqlite3_bind_text(check_stmt, 1, product->getName().c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(check_stmt, 2, shop_id);
 
     int count = 0;
     if (sqlite3_step(check_stmt) == SQLITE_ROW) {
@@ -124,25 +152,24 @@ void Shop::addProduct(std::unique_ptr<Product> product) {
     const char* sql = "INSERT INTO Products (shop_id, name, retail_price, wholesale_price, quantity) VALUES (?, ?, ?, ?, ?);";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare insert statement: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Ошибка SQL: " << sqlite3_errmsg(db) << std::endl;
         return;
     }
 
-    sqlite3_bind_int(stmt, 1, 1);
+    sqlite3_bind_int(stmt, 1, shop_id);
     sqlite3_bind_text(stmt, 2, product->getName().c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_double(stmt, 3, product->getRetailPrice());
-    sqlite3_bind_double(stmt, 4, product->getWholesalePrice(true)); 
+    sqlite3_bind_double(stmt, 4, product->getWholesalePrice(true));
     sqlite3_bind_int(stmt, 5, product->getQuantity());
 
-    if (sqlite3_step(stmt) != SQLITE_DONE) {
-        std::cerr << "Failed to insert product: " << sqlite3_errmsg(db) << std::endl;
-    } else {
+    if (sqlite3_step(stmt) == SQLITE_DONE) {
+        products.addItem(std::move(product)); 
         std::cout << "Товар добавлен успешно.\n";
+    } else {
+        std::cerr << "Ошибка при добавлении товара: " << sqlite3_errmsg(db) << std::endl;
     }
 
     sqlite3_finalize(stmt);
-
-    products.push_back(std::move(product));
 }
 
 void Shop::removeProduct(const std::string_view productName) {
@@ -154,24 +181,19 @@ void Shop::removeProduct(const std::string_view productName) {
     const char* sql = "DELETE FROM Products WHERE name = ?;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare delete statement: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Ошибка подготовки запроса на удаление: " << sqlite3_errmsg(db) << std::endl;
         return;
     }
     sqlite3_bind_text(stmt, 1, productName.data(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(stmt) != SQLITE_DONE) {
-        std::cerr << "Failed to delete product: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Ошибка при удалении товара: " << sqlite3_errmsg(db) << std::endl;
+    } else {
+        products.removeItem(std::string(productName));
+        std::cout << "Товар удален.\n";
     }
 
     sqlite3_finalize(stmt);
-
-    auto new_end = std::ranges::remove_if(products, [&](const std::unique_ptr<Product>& p) {
-        return p->getName() == productName;
-    });
-
-    products.erase(new_end.begin(), products.end());
-
-    std::cout << "Товар удален.\n";
 }
 
 
@@ -250,19 +272,10 @@ void Shop::makeSale(const std::string_view productName, int qty, double discount
 void Shop::displayShop(bool isAdmin) const {
     std::cout << "Магазин: " << name << std::endl;
     std::cout << "Продавцы:" << std::endl;
-    
-    for (const auto& seller : sellers) {
-        std::cout << "Продавец: " << seller->getName() 
-                  << ", Зарплата: " << seller->getSalary() 
-                  << ", Роль: " << seller->getRole()
-                  << std::endl;
-    }
+    sellers.displayAll(); 
 
     std::cout << "Товары:" << std::endl;
-    
-    for (const auto& product : products) {
-        product->displayProduct(isAdmin);
-    }
+    products.displayAll(isAdmin);
 }
 
 void Shop::displaySalesHistory() const {
@@ -301,15 +314,16 @@ void Shop::displaySalesHistory() const {
 }
 
 void Shop::loadSellersFromDB() {
-    const char* sql = "SELECT name, salary, is_admin FROM Users;";
+    const char* sql = "SELECT name, salary, is_admin FROM Users WHERE shop_id = ?;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_int(stmt, 1, shop_id);
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             std::string sellerName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));  
             double salary = sqlite3_column_double(stmt, 1);
             bool isAdmin = sqlite3_column_int(stmt, 2);
             std::cout << "Загружен продавец: " << sellerName << ", зарплата: " << salary << std::endl;
-            sellers.push_back(std::make_unique<Seller>(sellerName, salary, isAdmin));
+            sellers.addItem(std::make_unique<Seller>(sellerName, salary, isAdmin));
         }
         sqlite3_finalize(stmt);
     } else {
@@ -318,15 +332,16 @@ void Shop::loadSellersFromDB() {
 }
 
 void Shop::loadProductsFromDB() {
-    const char* sql = "SELECT name, retail_price, wholesale_price, quantity FROM Products;";
+    const char* sql = "SELECT name, retail_price, wholesale_price, quantity FROM Products WHERE shop_id = ?;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_int(stmt, 1, shop_id);
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             std::string productName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)); 
             double retailPrice = sqlite3_column_double(stmt, 1);
             double wholesalePrice = sqlite3_column_double(stmt, 2);
             int quantity = sqlite3_column_int(stmt, 3);
-            products.push_back(std::make_unique<Product>(productName, retailPrice, wholesalePrice, quantity));
+            products.addItem(std::make_unique<Product>(productName, retailPrice, wholesalePrice, quantity));
         }
         sqlite3_finalize(stmt);
     } else {
@@ -335,11 +350,11 @@ void Shop::loadProductsFromDB() {
 }
 
 const std::vector<std::unique_ptr<Seller>>& Shop::getSellers() const {
-    return sellers;
+    return sellers.getItems();
 }
 
 const std::vector<std::unique_ptr<Product>>& Shop::getProducts() const {
-    return products;
+    return products.getItems();
 }
 
 std::vector<Sale> Shop::getSalesHistory() const {
@@ -351,7 +366,7 @@ std::vector<Sale> Shop::getSalesHistory() const {
         JOIN Users ON Sales.seller_id = Users.id;
     )";
     
-    if (sqlite3_stmt* stmt; sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {  // Использование init-statement
+    if (sqlite3_stmt* stmt; sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {  
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             std::string productName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
             std::string sellerName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
@@ -360,12 +375,11 @@ std::vector<Sale> Shop::getSalesHistory() const {
             double discount = sqlite3_column_double(stmt, 4);
             double profit = sqlite3_column_double(stmt, 5);
 
-            // Добавляем продажу в вектор sales
             sales.emplace_back(productName, quantitySold, salePrice, discount, profit);
         }
-        sqlite3_finalize(stmt);  // Завершаем запрос
+        sqlite3_finalize(stmt);  
     } else {
         std::cerr << "Ошибка при загрузке продаж: " << sqlite3_errmsg(db) << std::endl;
     }
-    return sales;  // Возвращаем список продаж
+    return sales;  
 }

@@ -1,4 +1,5 @@
 #include "../Headers/Mainwindow.hpp"
+#include "../Headers/Utility.hpp" 
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLabel>
@@ -17,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         std::cerr << "Cannot open database: " << sqlite3_errmsg(db) << std::endl;
         return;
     }
-    vapeShop = std::make_unique<Shop>("Scam Judas", db);
+    vapeShop = std::make_unique<Shop>("Scam_Judas", db);
 
     auto *centralWidget = new QWidget(this);
     auto *layout = new QVBoxLayout(centralWidget);
@@ -33,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     auto *button6 = new QPushButton("Добавить продавца", this);  
     auto *button7 = new QPushButton("Добавить продукт", this);   
     auto *button8 = new QPushButton("История продаж", this);
+    auto *button9 = new QPushButton("Найти информацию по имени", this);
+
 
     layout->addWidget(button1);
     layout->addWidget(button2);
@@ -42,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     layout->addWidget(button6);
     layout->addWidget(button7);
     layout->addWidget(button8);
+    layout->addWidget(button9);
+
 
     infoDisplay = new QTextEdit(this);
     infoDisplay->setReadOnly(true);
@@ -57,6 +62,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(button6, &QPushButton::clicked, this, &MainWindow::addSeller);  
     connect(button7, &QPushButton::clicked, this, &MainWindow::addProduct);
     connect(button8, &QPushButton::clicked, this, &MainWindow::displaySalesHistory);
+    connect(button9, &QPushButton::clicked, this, &MainWindow::displayInfoByName);
 }
 
 MainWindow::~MainWindow() {
@@ -222,6 +228,38 @@ void MainWindow::displaySalesHistory() {
                    .arg(sale.getSalePrice())
                    .arg(sale.getDiscount())
                    .arg(sale.getProfit());
+    }
+
+    infoDisplay->setText(info);
+}
+
+void MainWindow::displayInfoByName() {
+    bool ok;
+    QString name = QInputDialog::getText(this, tr("Введите имя"),
+                                         tr("Введите имя продукта или продавца:"), 
+                                         QLineEdit::Normal, "", &ok);
+    if (!ok || name.isEmpty()) return;
+
+    bool isAdmin = true;  
+
+    QString info;
+
+    auto productInfo = printInfoByName(vapeShop->getProducts(), name.toStdString(), [](const Product& p) {
+        return p.getName();
+    }, isAdmin);
+    
+    if (productInfo) {
+        info += QString::fromStdString(*productInfo);
+    } else {
+        auto sellerInfo = printInfoByName(vapeShop->getSellers(), name.toStdString(), [](const Seller& s) {
+            return s.getName();
+        });
+
+        if (sellerInfo) {
+            info += QString::fromStdString(*sellerInfo);
+        } else {
+            info += QString("Элемент с именем \"%1\" не найден.\n").arg(name);
+        }
     }
 
     infoDisplay->setText(info);
