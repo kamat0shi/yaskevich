@@ -20,13 +20,6 @@ double Product::getWholesalePrice(bool isAdmin) const {
 }
 int Product::getQuantity() const { return quantity; }
 
-void Product::displayProduct(bool isAdmin) const {
-    std::cout << "Название: " << name << ", Розничная цена: " << retailPrice << ", Количество: " << quantity << std::endl;
-    if (isAdmin) {
-        std::cout << "Оптовая цена: " << wholesalePrice << std::endl;
-    }
-}
-
 void Product::reduceQuantity(int qty) {
     if (qty <= quantity) {
         quantity -= qty;

@@ -42,8 +42,6 @@ public:
 
     void reduceQuantity(int qty);
 
-    void displayProduct(bool isAdmin) const;
-
     int getIdByName(sqlite3* db, const std::string& productName) const;
 
     double calculateProfit(int qty) const;
