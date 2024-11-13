@@ -270,6 +270,7 @@ void Shop::makeSale(const std::string_view productName, int qty, double discount
         sqlite3_finalize(insertStmt);
 
     } catch (const CustomException& e) {
+        std::cerr << "Исключение: " << e.what() << std::endl;
         throw;
     }
 }
