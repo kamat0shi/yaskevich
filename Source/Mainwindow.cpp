@@ -67,9 +67,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(button7, &QPushButton::clicked, this, &MainWindow::addProduct);
     connect(button8, &QPushButton::clicked, this, &MainWindow::displaySalesHistory);
     connect(button9, &QPushButton::clicked, this, &MainWindow::displayInfoByName);
-    connect(reportButton, &QPushButton::clicked, this, [this]() {
+    connect(reportButton, &QPushButton::clicked, this, [this]() { // Захват “this” позволяет лямбда-функции использовать указатель на объект MainWindow для вызова методов и управления жизненным циклом дочерних окон, таких как ReportWindow.
         ReportWindow *reportWindow = new ReportWindow();
-        reportWindow->setAttribute(Qt::WA_DeleteOnClose);  // Убедитесь, что окно удаляется при закрытии
+        reportWindow->setAttribute(Qt::WA_DeleteOnClose);
         reportWindow->show();
     });
 }
@@ -151,8 +151,8 @@ void MainWindow::addSeller() {
 
     } catch (const CustomException& e) {
         QMessageBox::warning(this, "Ошибка", e.what());
-    } catch (const std::exception& e) {
-        QMessageBox::critical(this, "Ошибка", QString("Произошла неожиданная ошибка: %1").arg(e.what()));
+    } catch (const std::runtime_error& e) {  
+        QMessageBox::critical(this, "Ошибка", QString("Runtime error: %1").arg(e.what()));
     }
 }
 
@@ -171,8 +171,8 @@ void MainWindow::removeSeller() {
 
     } catch (const CustomException& e) {
         QMessageBox::warning(this, "Ошибка", e.what());
-    } catch (const std::exception& e) {
-        QMessageBox::critical(this, "Ошибка", QString("Произошла неожиданная ошибка: %1").arg(e.what()));
+    } catch (const std::runtime_error& e) {  
+        QMessageBox::critical(this, "Ошибка", QString("Runtime error: %1").arg(e.what()));
     }
 }
 
@@ -206,8 +206,8 @@ void MainWindow::addProduct() {
 
     } catch (const CustomException& e) {
         QMessageBox::warning(this, "Ошибка", e.what());
-    } catch (const std::exception& e) {
-        QMessageBox::critical(this, "Ошибка", QString("Произошла неожиданная ошибка: %1").arg(e.what()));
+    } catch (const std::runtime_error& e) {  
+        QMessageBox::critical(this, "Ошибка", QString("Runtime error: %1").arg(e.what()));
     }
 }
 
@@ -226,8 +226,8 @@ void MainWindow::removeProduct() {
 
     } catch (const CustomException& e) {
         QMessageBox::warning(this, "Ошибка", e.what());
-    } catch (const std::exception& e) {
-        QMessageBox::critical(this, "Ошибка", QString("Произошла неожиданная ошибка: %1").arg(e.what()));
+    } catch (const std::runtime_error& e) {  
+        QMessageBox::critical(this, "Ошибка", QString("Runtime error: %1").arg(e.what()));
     }
 }
 
@@ -265,8 +265,8 @@ void MainWindow::makeSale() {
 
     } catch (const CustomException& e) {
         QMessageBox::warning(this, "Ошибка", e.what());
-    } catch (const std::exception& e) {
-        QMessageBox::critical(this, "Ошибка", QString("Произошла неожиданная ошибка: %1").arg(e.what()));
+    } catch (const std::runtime_error& e) {  
+        QMessageBox::critical(this, "Ошибка", QString("Runtime error: %1").arg(e.what()));
     }
 }
 

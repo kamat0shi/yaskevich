@@ -10,7 +10,7 @@
 #include <sqlite3.h>
 #include <xlsxwriter.h>
 
-ReportWindow::ReportWindow(QWidget *parent) : QWidget(parent), db(nullptr) {
+ReportWindow::ReportWindow(QWidget *parent) : QWidget(parent) {
     if (int rc = sqlite3_open("../shop_db.db", &db); rc != SQLITE_OK) {
         std::cerr << "Cannot open database: " << sqlite3_errmsg(db) << std::endl;
         QMessageBox::critical(this, "Ошибка", "Не удалось подключиться к базе данных.");
