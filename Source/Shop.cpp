@@ -2,11 +2,16 @@
 #include "../Headers/Shop.hpp"
 #include "../Headers/Sale.hpp" 
 #include "../Headers/Utility.hpp"
+#include "../Headers/CustomException.hpp"
 
 Shop::Shop(const std::string_view n, sqlite3* db) : name(n), db(db) {
-    fetchShopIdByName();
-    loadSellersFromDB();
-    loadProductsFromDB();
+    try {
+        fetchShopIdByName();
+        loadSellersFromDB();
+        loadProductsFromDB();
+    } catch (const CustomException& e) {
+        std::cerr << "Ошибка при инициализации магазина: " << e.what() << std::endl;
+    }
 }
 
 void Shop::fetchShopIdByName() {
@@ -14,8 +19,7 @@ void Shop::fetchShopIdByName() {
     sqlite3_stmt* check_stmt;
     
     if (sqlite3_prepare_v2(db, check_sql, -1, &check_stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Ошибка при подготовке SQL-запроса: " << sqlite3_errmsg(db) << std::endl;
-        return;
+        throw CustomException("Ошибка при подготовке SQL-запроса: " + std::string(sqlite3_errmsg(db)));
     }
     
     sqlite3_bind_text(check_stmt, 1, name.c_str(), -1, SQLITE_STATIC);
@@ -198,56 +202,59 @@ void Shop::removeProduct(const std::string_view productName) {
 
 
 void Shop::makeSale(const std::string_view productName, int qty, double discount, const std::string& sellerName) {
-    Product* product = getProduct(productName);
-    const Seller* seller = getSeller(sellerName);
+    try {
+        Product* product = getProduct(productName);
+        const Seller* seller = getSeller(sellerName);
 
-    if (!product || !seller) {
-        std::cerr << "Продукт или продавец не найдены!" << std::endl;
-        return;
-    }
+        if (!product || !seller) {
+            throw CustomException("Продукт или продавец не найдены!");
+        }
 
-    if (product->getQuantity() < qty) {
-        std::cerr << "Недостаточно товара на складе!" << std::endl;
-        return;
-    }
+        if (product->getQuantity() < qty) {
+            throw CustomException("Недостаточно товара на складе!");
+        }
 
-    int productId = product->getIdByName(db, product->getName());
-    int sellerId = seller->getIdByName(db, seller->getName());
+        int productId = product->getIdByName(db, product->getName());
+        int sellerId = seller->getIdByName(db, seller->getName());
 
-    if (productId == 0 || sellerId == 0) {
-        std::cerr << "Ошибка получения идентификаторов продукта или продавца!" << std::endl;
-        return;
-    }
+        if (productId == 0 || sellerId == 0) {
+            throw CustomException("Ошибка получения идентификаторов продукта или продавца!");
+        }
 
-    double profit;
-    if (discount > 0) {
-        profit = product->calculateProfit(qty, discount);
-    } else {
-        profit = product->calculateProfit(qty);
-    }
+        double profit;
+        if (discount > 0) {
+            profit = product->calculateProfit(qty, discount);
+        } else {
+            profit = product->calculateProfit(qty);
+        }
 
-    double salePrice = product->getRetailPrice() * qty * (1 - discount / 100.0);
+        double salePrice = product->getRetailPrice() * qty * (1 - discount / 100.0);
 
-    if (sqlite3_stmt* updateStmt; sqlite3_prepare_v2(db, "UPDATE Products SET quantity = quantity - ? WHERE id = ?;", -1, &updateStmt, nullptr) == SQLITE_OK) {
+        sqlite3_stmt* updateStmt;
+        if (sqlite3_prepare_v2(db, "UPDATE Products SET quantity = quantity - ? WHERE id = ?;", -1, &updateStmt, nullptr) != SQLITE_OK) {
+            throw CustomException("Ошибка подготовки SQL-запроса на обновление товара: " + std::string(sqlite3_errmsg(db)));
+        }
+
         sqlite3_bind_int(updateStmt, 1, qty);
         sqlite3_bind_int(updateStmt, 2, productId);
 
         if (sqlite3_step(updateStmt) != SQLITE_DONE) {
-            std::cerr << "Ошибка обновления количества товара: " << sqlite3_errmsg(db) << std::endl;
+            sqlite3_finalize(updateStmt);
+            throw CustomException("Ошибка обновления количества товара: " + std::string(sqlite3_errmsg(db)));
         } else {
-            std::cout << "Количество товара успешно обновлено." << std::endl;
             product->setQuantity(product->getQuantity() - qty);
         }
 
         sqlite3_finalize(updateStmt);
-    } else {
-        std::cerr << "Ошибка подготовки SQL-запроса на обновление товара: " << sqlite3_errmsg(db) << std::endl;
-    }
 
-    if (sqlite3_stmt* insertStmt; sqlite3_prepare_v2(db, R"(
-        INSERT INTO Sales (product_id, seller_id, quantity_sold, sale_price, discount, profit)
-        VALUES (?, ?, ?, ?, ?, ?);
-    )", -1, &insertStmt, nullptr) == SQLITE_OK) {
+        sqlite3_stmt* insertStmt;
+        if (sqlite3_prepare_v2(db, R"(
+            INSERT INTO Sales (product_id, seller_id, quantity_sold, sale_price, discount, profit)
+            VALUES (?, ?, ?, ?, ?, ?);
+        )", -1, &insertStmt, nullptr) != SQLITE_OK) {
+            throw CustomException("Ошибка подготовки SQL-запроса для продажи: " + std::string(sqlite3_errmsg(db)));
+        }
+
         sqlite3_bind_int(insertStmt, 1, productId);
         sqlite3_bind_int(insertStmt, 2, sellerId);
         sqlite3_bind_int(insertStmt, 3, qty);
@@ -256,17 +263,15 @@ void Shop::makeSale(const std::string_view productName, int qty, double discount
         sqlite3_bind_double(insertStmt, 6, profit);
 
         if (sqlite3_step(insertStmt) != SQLITE_DONE) {
-            std::cerr << "Ошибка добавления продажи: " << sqlite3_errmsg(db) << std::endl;
-        } else {
-            std::cout << "Продажа успешно добавлена в базу данных." << std::endl;
+            sqlite3_finalize(insertStmt);
+            throw CustomException("Ошибка добавления продажи: " + std::string(sqlite3_errmsg(db)));
         }
 
         sqlite3_finalize(insertStmt);
-    } else {
-        std::cerr << "Ошибка подготовки SQL-запроса для продажи: " << sqlite3_errmsg(db) << std::endl;
-    }
 
-    std::cout << "Продажа завершена! Прибыль: $" << profit << std::endl;
+    } catch (const CustomException& e) {
+        throw;
+    }
 }
 
 void Shop::displayShop(bool isAdmin) const {
@@ -375,7 +380,7 @@ std::vector<Sale> Shop::getSalesHistory() const {
             double discount = sqlite3_column_double(stmt, 4);
             double profit = sqlite3_column_double(stmt, 5);
 
-            sales.emplace_back(productName, quantitySold, salePrice, discount, profit);
+            sales.emplace_back(productName, quantitySold, salePrice, discount, profit, sellerName);
         }
         sqlite3_finalize(stmt);  
     } else {

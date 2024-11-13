@@ -1,6 +1,7 @@
 #pragma once
 #include "../Headers/Product.hpp"
 #include "../Headers/Seller.hpp"
+#include "ContainerIterator.hpp"
 #include <vector>
 #include <memory>
 #include <algorithm>
@@ -13,6 +14,8 @@ private:
     std::vector<std::unique_ptr<T>> items;
 
 public:
+    using iterator = ContainerIterator<T>;
+
     void addItem(std::unique_ptr<T> item) {
         items.push_back(std::move(item));
     }
@@ -46,4 +49,7 @@ public:
     const std::vector<std::unique_ptr<T>>& getItems() const {
         return items;
     }
+
+    iterator begin() { return iterator(items.begin()); }
+    iterator end() { return iterator(items.end()); }
 };

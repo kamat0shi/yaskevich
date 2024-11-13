@@ -1,5 +1,7 @@
 #include "../Headers/Mainwindow.hpp"
 #include "../Headers/Utility.hpp" 
+#include "../Headers/CustomException.hpp"
+#include "../Headers/ReportWindow.hpp"
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLabel>
@@ -35,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     auto *button7 = new QPushButton("Добавить продукт", this);   
     auto *button8 = new QPushButton("История продаж", this);
     auto *button9 = new QPushButton("Найти информацию по имени", this);
+    auto *reportButton = new QPushButton("Загрузить отчеты", this);
 
 
     layout->addWidget(button1);
@@ -46,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     layout->addWidget(button7);
     layout->addWidget(button8);
     layout->addWidget(button9);
+    layout->addWidget(reportButton);
 
 
     infoDisplay = new QTextEdit(this);
@@ -63,6 +67,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(button7, &QPushButton::clicked, this, &MainWindow::addProduct);
     connect(button8, &QPushButton::clicked, this, &MainWindow::displaySalesHistory);
     connect(button9, &QPushButton::clicked, this, &MainWindow::displayInfoByName);
+    connect(reportButton, &QPushButton::clicked, this, [this]() {
+        ReportWindow *reportWindow = new ReportWindow();
+        reportWindow->setAttribute(Qt::WA_DeleteOnClose);  // Убедитесь, что окно удаляется при закрытии
+        reportWindow->show();
+    });
 }
 
 MainWindow::~MainWindow() {
@@ -116,105 +125,149 @@ void MainWindow::displayShopAdmin() {
 
     infoDisplay->setText(info);
 }
+
 void MainWindow::addSeller() {
-    bool ok;
-    QString name = QInputDialog::getText(this, tr("Добавить продавца"),
-                                         tr("Имя продавца:"), QLineEdit::Normal,
-                                         "", &ok);
-    if (!ok || name.isEmpty()) return;
+    try {
+        bool ok;
+        QString name = QInputDialog::getText(this, tr("Добавить продавца"),
+                                             tr("Имя продавца:"), QLineEdit::Normal,
+                                             "", &ok);
+        if (!ok || name.isEmpty()) {
+            throw CustomException("Имя продавца не введено.");
+        }
 
-    double salary = QInputDialog::getDouble(this, tr("Зарплата"), tr("Введите зарплату:"), 0, 0, 10000, 2, &ok);
-    if (!ok) return;
+        double salary = QInputDialog::getDouble(this, tr("Зарплата"), tr("Введите зарплату:"), 0, 0, 10000, 2, &ok);
+        if (!ok || salary <= 0) {
+            throw CustomException("Некорректная зарплата.");
+        }
 
-    bool isAdmin = QInputDialog::getInt(this, tr("Администратор?"), tr("Введите 1, если администратор, 0 если нет:"), 0, 0, 1, 1, &ok);
-    if (!ok) return;
+        bool isAdmin = QInputDialog::getInt(this, tr("Администратор?"), tr("Введите 1, если администратор, 0 если нет:"), 0, 0, 1, 1, &ok);
+        if (!ok) {
+            throw CustomException("Ошибка при вводе данных о роли администратора.");
+        }
 
-    
-    vapeShop->addSeller(std::make_unique<Seller>(name.toStdString(), salary, isAdmin));
-    QMessageBox::information(this, "Добавление", "Продавец успешно добавлен.");
+        vapeShop->addSeller(std::make_unique<Seller>(name.toStdString(), salary, isAdmin));
+        QMessageBox::information(this, "Добавление", "Продавец успешно добавлен.");
+
+    } catch (const CustomException& e) {
+        QMessageBox::warning(this, "Ошибка", e.what());
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "Ошибка", QString("Произошла неожиданная ошибка: %1").arg(e.what()));
+    }
 }
 
-
 void MainWindow::removeSeller() {
-    bool ok;
-    QString sellerName = QInputDialog::getText(this, tr("Удалить продавца"),
-                                               tr("Имя продавца:"), QLineEdit::Normal,
-                                               "", &ok);
-    if (ok && !sellerName.isEmpty()) {
+    try {
+        bool ok;
+        QString sellerName = QInputDialog::getText(this, tr("Удалить продавца"),
+                                                   tr("Имя продавца:"), QLineEdit::Normal,
+                                                   "", &ok);
+        if (!ok || sellerName.isEmpty()) {
+            throw CustomException("Имя продавца не введено.");
+        }
+
         vapeShop->removeSeller(sellerName.toStdString()); 
         QMessageBox::information(this, "Удаление", QString("Продавец %1 удален.").arg(sellerName));
-    } else {
-        QMessageBox::warning(this, "Ошибка", "Имя продавца не введено.");
+
+    } catch (const CustomException& e) {
+        QMessageBox::warning(this, "Ошибка", e.what());
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "Ошибка", QString("Произошла неожиданная ошибка: %1").arg(e.what()));
     }
 }
 
 void MainWindow::addProduct() {
-    bool ok;
-    QString name = QInputDialog::getText(this, tr("Добавить продукт"),
-                                         tr("Имя продукта:"), QLineEdit::Normal,
-                                         "", &ok);
-    if (!ok || name.isEmpty()) return;
+    try {
+        bool ok;
+        QString name = QInputDialog::getText(this, tr("Добавить продукт"),
+                                             tr("Имя продукта:"), QLineEdit::Normal,
+                                             "", &ok);
+        if (!ok || name.isEmpty()) {
+            throw CustomException("Имя продукта не введено.");
+        }
 
-    double retailPrice = QInputDialog::getDouble(this, tr("Розничная цена"), tr("Введите розничную цену:"), 0, 0, 10000, 2, &ok);
-    if (!ok) return;
+        double retailPrice = QInputDialog::getDouble(this, tr("Розничная цена"), tr("Введите розничную цену:"), 0, 0, 10000, 2, &ok);
+        if (!ok || retailPrice <= 0) {
+            throw CustomException("Некорректная розничная цена.");
+        }
 
-    double wholesalePrice = QInputDialog::getDouble(this, tr("Оптовая цена"), tr("Введите оптовую цену:"), 0, 0, 10000, 2, &ok);
-    if (!ok) return;
+        double wholesalePrice = QInputDialog::getDouble(this, tr("Оптовая цена"), tr("Введите оптовую цену:"), 0, 0, 10000, 2, &ok);
+        if (!ok || wholesalePrice <= 0) {
+            throw CustomException("Некорректная оптовая цена.");
+        }
 
-    int quantity = QInputDialog::getInt(this, tr("Количество"), tr("Введите количество товара:"), 1, 1, 1000, 1, &ok);
-    if (!ok) return;
+        int quantity = QInputDialog::getInt(this, tr("Количество"), tr("Введите количество товара:"), 1, 1, 1000, 1, &ok);
+        if (!ok || quantity <= 0) {
+            throw CustomException("Некорректное количество.");
+        }
 
-    vapeShop->addProduct(std::make_unique<Product>(name.toStdString(), retailPrice, wholesalePrice, quantity));
-    QMessageBox::information(this, "Добавление", "Продукт успешно добавлен.");
+        vapeShop->addProduct(std::make_unique<Product>(name.toStdString(), retailPrice, wholesalePrice, quantity));
+        QMessageBox::information(this, "Добавление", "Продукт успешно добавлен.");
+
+    } catch (const CustomException& e) {
+        QMessageBox::warning(this, "Ошибка", e.what());
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "Ошибка", QString("Произошла неожиданная ошибка: %1").arg(e.what()));
+    }
 }
 
 void MainWindow::removeProduct() {
-    bool ok;
-    QString productName = QInputDialog::getText(this, tr("Удалить продукт"),
-                                                tr("Имя продукта:"), QLineEdit::Normal,
-                                                "", &ok);
-    if (ok && !productName.isEmpty()) {
+    try {
+        bool ok;
+        QString productName = QInputDialog::getText(this, tr("Удалить продукт"),
+                                                    tr("Имя продукта:"), QLineEdit::Normal,
+                                                    "", &ok);
+        if (!ok || productName.isEmpty()) {
+            throw CustomException("Имя продукта не введено.");
+        }
+
         vapeShop->removeProduct(productName.toStdString()); 
         QMessageBox::information(this, "Удаление", QString("Продукт %1 удален.").arg(productName));
-    } else {
-        QMessageBox::warning(this, "Ошибка", "Имя продукта не введено.");
+
+    } catch (const CustomException& e) {
+        QMessageBox::warning(this, "Ошибка", e.what());
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "Ошибка", QString("Произошла неожиданная ошибка: %1").arg(e.what()));
     }
 }
 
 void MainWindow::makeSale() {
-    bool ok;
-    
-    QString productName = QInputDialog::getText(this, tr("Продажа товара"),
-                                                tr("Имя продукта:"), QLineEdit::Normal,
-                                                "", &ok);
-    if (!ok || productName.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка", "Имя продукта не введено.");
-        return;
-    }
-    
-    int qty = QInputDialog::getInt(this, tr("Количество"), tr("Введите количество:"), 1, 1, 1000, 1, &ok);
-    if (!ok || qty <= 0) {
-        QMessageBox::warning(this, "Ошибка", "Некорректное количество.");
-        return;
-    }
-    
-    double discount = QInputDialog::getDouble(this, tr("Скидка"), tr("Введите скидку (%):"), 0, 0, 100, 1, &ok);
-    if (!ok) {
-        QMessageBox::warning(this, "Ошибка", "Скидка не введена.");
-        return;
-    }
+    try {
+        bool ok;
 
-    QString sellerName = QInputDialog::getText(this, tr("Продажа от лица продавца"),
-                                               tr("Имя продавца:"), QLineEdit::Normal,
-                                               "", &ok);
-    if (!ok || sellerName.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка", "Имя продавца не введено.");
-        return;
-    }
+        QString productName = QInputDialog::getText(this, tr("Продажа товара"),
+                                                    tr("Имя продукта:"), QLineEdit::Normal,
+                                                    "", &ok);
+        if (!ok || productName.isEmpty()) {
+            throw CustomException("Имя продукта не введено.");
+        }
 
-    vapeShop->makeSale(productName.toStdString(), qty, discount, sellerName.toStdString());
-    QMessageBox::information(this, "Продажа", QString("Продажа завершена: %1 x %2 со скидкой %3% от продавца %4.")
-                                            .arg(productName).arg(qty).arg(discount).arg(sellerName));
+        int qty = QInputDialog::getInt(this, tr("Количество"), tr("Введите количество:"), 1, 1, 1000, 1, &ok);
+        if (!ok || qty <= 0) {
+            throw CustomException("Некорректное количество.");
+        }
+
+        double discount = QInputDialog::getDouble(this, tr("Скидка"), tr("Введите скидку (%):"), 0, 0, 100, 1, &ok);
+        if (!ok) {
+            throw CustomException("Скидка не введена.");
+        }
+
+        QString sellerName = QInputDialog::getText(this, tr("Продажа от лица продавца"),
+                                                   tr("Имя продавца:"), QLineEdit::Normal,
+                                                   "", &ok);
+        if (!ok || sellerName.isEmpty()) {
+            throw CustomException("Имя продавца не введено.");
+        }
+
+        vapeShop->makeSale(productName.toStdString(), qty, discount, sellerName.toStdString());
+        QMessageBox::information(this, "Продажа", QString("Продажа завершена: %1 x %2 со скидкой %3% от продавца %4.")
+                                                .arg(productName).arg(qty).arg(discount).arg(sellerName));
+
+    } catch (const CustomException& e) {
+        QMessageBox::warning(this, "Ошибка", e.what());
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "Ошибка", QString("Произошла неожиданная ошибка: %1").arg(e.what()));
+    }
 }
 
 void MainWindow::displaySalesHistory() {

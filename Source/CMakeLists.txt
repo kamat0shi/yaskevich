@@ -8,8 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_PREFIX_PATH "/opt/homebrew/opt/qt/lib/cmake")
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
-
 find_package(SQLite3 REQUIRED)
+
+include_directories("/opt/homebrew/include")
 
 set(SOURCES
     Shop.cpp
@@ -21,10 +22,14 @@ set(SOURCES
     AdminSeller.cpp
     main.cpp
     Mainwindow.cpp
+    ReportWindow.cpp
 )
 
-qt6_wrap_cpp(MOC_SOURCES ../Headers/Mainwindow.hpp)
+qt6_wrap_cpp(MOC_SOURCES
+    ../Headers/Mainwindow.hpp
+    ../Headers/ReportWindow.hpp
+)
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${MOC_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} Qt6::Widgets SQLite::SQLite3)
+target_link_libraries(${PROJECT_NAME} Qt6::Widgets SQLite::SQLite3 /opt/homebrew/lib/libxlsxwriter.dylib)
