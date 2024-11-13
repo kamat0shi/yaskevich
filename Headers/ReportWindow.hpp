@@ -12,7 +12,7 @@ class ReportWindow : public QWidget {
 
 public:
     explicit ReportWindow(QWidget *parent = nullptr);
-    ~ReportWindow();
+    ~ReportWindow() override;
 
 private slots:
     void fetchShopId();

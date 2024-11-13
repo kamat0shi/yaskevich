@@ -32,6 +32,5 @@ public:
         return temp;
     }
 
-    bool operator==(const ContainerIterator& other) const { return it == other.it; }
-    bool operator!=(const ContainerIterator& other) const { return it != other.it; }
+    bool operator==(const ContainerIterator& other) const = default;
 };
