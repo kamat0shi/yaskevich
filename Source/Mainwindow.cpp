@@ -169,8 +169,6 @@ void MainWindow::removeSeller() {
 
     } catch (const CustomException& e) {
         QMessageBox::warning(this, "Ошибка", e.what());
-    } catch (const std::runtime_error& e) {  
-        QMessageBox::critical(this, "Ошибка", QString("Runtime error: %1").arg(e.what()));
     }
 }
 
@@ -204,8 +202,6 @@ void MainWindow::addProduct() {
 
     } catch (const CustomException& e) {
         QMessageBox::warning(this, "Ошибка", e.what());
-    } catch (const std::runtime_error& e) {  
-        QMessageBox::critical(this, "Ошибка", QString("Runtime error: %1").arg(e.what()));
     }
 }
 
@@ -224,8 +220,6 @@ void MainWindow::removeProduct() {
 
     } catch (const CustomException& e) {
         QMessageBox::warning(this, "Ошибка", e.what());
-    } catch (const std::runtime_error& e) {  
-        QMessageBox::critical(this, "Ошибка", QString("Runtime error: %1").arg(e.what()));
     }
 }
 
@@ -263,8 +257,6 @@ void MainWindow::makeSale() {
 
     } catch (const CustomException& e) {
         QMessageBox::warning(this, "Ошибка", e.what());
-    } catch (const std::runtime_error& e) {  
-        QMessageBox::critical(this, "Ошибка", QString("Runtime error: %1").arg(e.what()));
     }
 }
 
