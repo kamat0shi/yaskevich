@@ -85,7 +85,7 @@ void ReportWindow::downloadSalesHistory() {
     }
 
     QFileDialog dialog(this);
-    QString filePath = dialog.getSaveFileName(this, "Сохранить отчет о продажах", "", "Excel Files (*.xlsx);;All Files (*.*)");
+    QString filePath = QFileDialog::getSaveFileName(this, "Сохранить отчет о продажах", "", "Excel Files (*.xlsx);;All Files (*.*)");
 
     if (!filePath.isEmpty()) {
         std::vector<Sale> sales;
@@ -157,7 +157,7 @@ void ReportWindow::downloadProductList() {
     }
 
     QFileDialog dialog(this);
-    QString filePath = dialog.getSaveFileName(this, "Сохранить список товаров", "", "Excel Files (*.xlsx);;All Files (*.*)");
+    QString filePath = QFileDialog::getSaveFileName(this, "Сохранить список товаров", "", "Excel Files (*.xlsx);;All Files (*.*)");
 
     if (!filePath.isEmpty()) {
         std::vector<std::unique_ptr<Product>> products;
@@ -214,49 +214,52 @@ void ReportWindow::downloadSellerList() {
     bool filterForAdmin = (roleFilterValue == "админ");
     bool filterForNonAdmin = (roleFilterValue == "не админ");
 
-    QFileDialog dialog(this);
-    QString filePath = dialog.getSaveFileName(this, "Сохранить список продавцов", "", "Excel Files (*.xlsx);;All Files (*.*)");
+    QString filePath = QFileDialog::getSaveFileName(this, "Сохранить список продавцов", "", "Excel Files (*.xlsx);;All Files (*.*)");
+    if (filePath.isEmpty()) return;  
 
-    if (!filePath.isEmpty()) {
-        std::vector<std::unique_ptr<Seller>> sellers;
-        const char* sql = "SELECT name, salary, is_admin FROM Users WHERE shop_id = ?;";
-        sqlite3_stmt* stmt;
-        if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
-            sqlite3_bind_int(stmt, 1, shop_id);
-            while (sqlite3_step(stmt) == SQLITE_ROW) {
-                std::string sellerName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-                double salary = sqlite3_column_double(stmt, 1);
-                bool isAdmin = sqlite3_column_int(stmt, 2);
+    std::vector<std::unique_ptr<Seller>> sellers;
+    const char* sql = "SELECT name, salary, is_admin FROM Users WHERE shop_id = ?;";
+    sqlite3_stmt* stmt;
 
-                if ((filterForAdmin && !isAdmin) || (filterForNonAdmin && isAdmin)) {
-                    continue;
-                }
-
-                sellers.push_back(std::make_unique<Seller>(sellerName, salary, isAdmin));
-            }
-            sqlite3_finalize(stmt);
-        } else {
-            std::cerr << "Ошибка при загрузке продавцов: " << sqlite3_errmsg(db) << std::endl;
-            return;
-        }
-
-        lxw_workbook  *workbook  = workbook_new(filePath.toStdString().c_str());
-        lxw_worksheet *worksheet = workbook_add_worksheet(workbook, nullptr);
-
-        worksheet_write_string(worksheet, 0, 0, "Seller Name", nullptr);
-        worksheet_write_string(worksheet, 0, 1, "Salary", nullptr);
-        worksheet_write_string(worksheet, 0, 2, "Is Admin", nullptr);
-
-        int row = 1;
-        for (const auto& seller : sellers) {
-            worksheet_write_string(worksheet, row, 0, seller->getName().c_str(), nullptr);
-            worksheet_write_number(worksheet, row, 1, seller->getSalary(), nullptr);
-            worksheet_write_string(worksheet, row, 2, seller->getIsAdmin() ? "Yes" : "No", nullptr);
-            row++;
-        }
-
-        workbook_close(workbook);
-
-        QMessageBox::information(this, "Загрузка", "Список продавцов успешно сохранен в формате XLSX.");
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Ошибка при загрузке продавцов: " << sqlite3_errmsg(db) << std::endl;
+        return;
     }
+
+    sqlite3_bind_int(stmt, 1, shop_id);
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        std::string sellerName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        double salary = sqlite3_column_double(stmt, 1);
+        bool isAdmin = sqlite3_column_int(stmt, 2);
+
+        if ((filterForAdmin && !isAdmin) || (filterForNonAdmin && isAdmin)) continue;
+
+        sellers.push_back(std::make_unique<Seller>(sellerName, salary, isAdmin));
+    }
+    sqlite3_finalize(stmt);
+
+    if (sellers.empty()) {
+        QMessageBox::information(this, "Загрузка", "Нет продавцов, соответствующих фильтру.");
+        return; 
+    }
+
+    lxw_workbook* workbook = workbook_new(filePath.toStdString().c_str());
+    lxw_worksheet* worksheet = workbook_add_worksheet(workbook, nullptr);
+
+    worksheet_write_string(worksheet, 0, 0, "Seller Name", nullptr);
+    worksheet_write_string(worksheet, 0, 1, "Salary", nullptr);
+    worksheet_write_string(worksheet, 0, 2, "Is Admin", nullptr);
+
+    int row = 1;
+    for (const auto& seller : sellers) {
+        worksheet_write_string(worksheet, row, 0, seller->getName().c_str(), nullptr);
+        worksheet_write_number(worksheet, row, 1, seller->getSalary(), nullptr);
+        worksheet_write_string(worksheet, row, 2, seller->getIsAdmin() ? "Yes" : "No", nullptr);
+        row++;
+    }
+
+    workbook_close(workbook);
+
+    QMessageBox::information(this, "Загрузка", "Список продавцов успешно сохранен в формате XLSX.");
 }
