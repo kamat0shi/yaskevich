@@ -156,52 +156,56 @@ void ReportWindow::downloadProductList() {
         return;
     }
 
-    QFileDialog dialog(this);
     QString filePath = QFileDialog::getSaveFileName(this, "Сохранить список товаров", "", "Excel Files (*.xlsx);;All Files (*.*)");
+    if (filePath.isEmpty()) return; 
 
-    if (!filePath.isEmpty()) {
-        std::vector<std::unique_ptr<Product>> products;
-        const char* sql = "SELECT name, retail_price, wholesale_price, quantity FROM Products WHERE shop_id = ?;";
-        sqlite3_stmt* stmt;
-        if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
-            sqlite3_bind_int(stmt, 1, shop_id);
-            while (sqlite3_step(stmt) == SQLITE_ROW) {
-                std::string productName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-                double retailPrice = sqlite3_column_double(stmt, 1);
-                double wholesalePrice = sqlite3_column_double(stmt, 2);
-                int quantity = sqlite3_column_int(stmt, 3);
+    std::vector<std::unique_ptr<Product>> products;
+    const char* sql = "SELECT name, retail_price, wholesale_price, quantity FROM Products WHERE shop_id = ?;";
+    sqlite3_stmt* stmt;
 
-                if (quantity >= minQuantity) {
-                    products.push_back(std::make_unique<Product>(productName, retailPrice, wholesalePrice, quantity));
-                }
-            }
-            sqlite3_finalize(stmt);
-        } else {
-            std::cerr << "Ошибка при загрузке товаров: " << sqlite3_errmsg(db) << std::endl;
-            return;
-        }
-
-        lxw_workbook  *workbook  = workbook_new(filePath.toStdString().c_str());
-        lxw_worksheet *worksheet = workbook_add_worksheet(workbook, nullptr);
-
-        worksheet_write_string(worksheet, 0, 0, "Product Name", nullptr);
-        worksheet_write_string(worksheet, 0, 1, "Retail Price", nullptr);
-        worksheet_write_string(worksheet, 0, 2, "Wholesale Price", nullptr);
-        worksheet_write_string(worksheet, 0, 3, "Quantity", nullptr);
-
-        int row = 1;
-        for (const auto& product : products) {
-            worksheet_write_string(worksheet, row, 0, product->getName().c_str(), nullptr);
-            worksheet_write_number(worksheet, row, 1, product->getRetailPrice(), nullptr);
-            worksheet_write_number(worksheet, row, 2, product->getWholesalePrice(true), nullptr);
-            worksheet_write_number(worksheet, row, 3, product->getQuantity(), nullptr);
-            row++;
-        }
-
-        workbook_close(workbook);
-
-        QMessageBox::information(this, "Загрузка", "Список товаров успешно сохранен в формате XLSX.");
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Ошибка при загрузке товаров: " << sqlite3_errmsg(db) << std::endl;
+        return;
     }
+
+    sqlite3_bind_int(stmt, 1, shop_id);
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int quantity = sqlite3_column_int(stmt, 3);
+        if (quantity < minQuantity) continue; 
+
+        std::string productName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        double retailPrice = sqlite3_column_double(stmt, 1);
+        double wholesalePrice = sqlite3_column_double(stmt, 2);
+
+        products.push_back(std::make_unique<Product>(productName, retailPrice, wholesalePrice, quantity));
+    }
+    sqlite3_finalize(stmt);
+
+    if (products.empty()) {
+        QMessageBox::information(this, "Загрузка", "Нет товаров, соответствующих фильтру.");
+        return;
+    }
+
+    lxw_workbook* workbook = workbook_new(filePath.toStdString().c_str());
+    lxw_worksheet* worksheet = workbook_add_worksheet(workbook, nullptr);
+
+    worksheet_write_string(worksheet, 0, 0, "Product Name", nullptr);
+    worksheet_write_string(worksheet, 0, 1, "Retail Price", nullptr);
+    worksheet_write_string(worksheet, 0, 2, "Wholesale Price", nullptr);
+    worksheet_write_string(worksheet, 0, 3, "Quantity", nullptr);
+
+    int row = 1;
+    for (const auto& product : products) {
+        worksheet_write_string(worksheet, row, 0, product->getName().c_str(), nullptr);
+        worksheet_write_number(worksheet, row, 1, product->getRetailPrice(), nullptr);
+        worksheet_write_number(worksheet, row, 2, product->getWholesalePrice(true), nullptr);
+        worksheet_write_number(worksheet, row, 3, product->getQuantity(), nullptr);
+        row++;
+    }
+
+    workbook_close(workbook); // Закрываем Excel-файл
+
+    QMessageBox::information(this, "Загрузка", "Список товаров успешно сохранен в формате XLSX.");
 }
 
 void ReportWindow::downloadSellerList() {
