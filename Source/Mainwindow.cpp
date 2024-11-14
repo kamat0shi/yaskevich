@@ -151,8 +151,6 @@ void MainWindow::addSeller() {
 
     } catch (const CustomException& e) {
         QMessageBox::warning(this, "Ошибка", e.what());
-    } catch (const std::runtime_error& e) {  
-        QMessageBox::critical(this, "Ошибка", QString("Runtime error: %1").arg(e.what()));
     }
 }
 
